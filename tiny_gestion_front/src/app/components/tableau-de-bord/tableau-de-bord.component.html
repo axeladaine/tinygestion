@@ -320,7 +320,7 @@
                   <span style="background: #fef3c7; color: #b45309; font-weight: 700; font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;">Recette</span>
                   <span style="font-weight: 600; font-size: 1rem; color: #0f172a;">Réservation {{ r.nomClient || 'Voyageur' }} ({{ r.dateEncaissement | date:'dd/MM/yyyy' }}) — <strong>{{ r.montantBrut }} €</strong></span>
                 </div>
-                <a [routerLink]="['/justificatifs']" style="display: flex; align-items: center; gap: 0.5rem; background: #d97706; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Téléverser</a>
+                <a [routerLink]="['/recettes']" [queryParams]="{ editRecetteId: r.id }" style="display: flex; align-items: center; gap: 0.5rem; background: #d97706; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Téléverser</a>
               </div>
             }
             @for (d of depensesSansJustificatif; track d.id) {
@@ -329,7 +329,7 @@
                   <span style="background: #fee2e2; color: #b91c1c; font-weight: 700; font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;">Dépense</span>
                   <span style="font-weight: 600; font-size: 1rem; color: #0f172a;">Achat {{ d.fournisseur || 'Fournisseur' }} ({{ d.dateDepense | date:'dd/MM/yyyy' }}) — <strong>{{ d.montantTtc }} €</strong></span>
                 </div>
-                <a [routerLink]="['/justificatifs']" style="display: flex; align-items: center; gap: 0.5rem; background: #dc2626; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Téléverser</a>
+                <a [routerLink]="['/depenses']" [queryParams]="{ editDepenseId: d.id }" style="display: flex; align-items: center; gap: 0.5rem; background: #dc2626; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Téléverser</a>
               </div>
             }
           </div>

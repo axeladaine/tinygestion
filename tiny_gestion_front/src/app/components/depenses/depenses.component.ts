@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlatpickrDirective } from 'angularx-flatpickr';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DepenseService } from '../../services/depense.service';
 import { LogementService } from '../../services/logement.service';
 import { DocumentJustificatifService } from '../../services/document-justificatif.service';
@@ -20,6 +21,8 @@ export class DepensesComponent implements OnInit {
   private depenseService = inject(DepenseService);
   private logementService = inject(LogementService);
   private docService = inject(DocumentJustificatifService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   logementActif: Logement | null = null;
   depenses: Depense[] = [];
@@ -135,6 +138,23 @@ export class DepensesComponent implements OnInit {
           return dateB - dateA; // Décroissant
         });
         this.chargement = false;
+
+        // Vérifier s'il y a un paramètre editDepenseId dans l'URL (redirection depuis le TBB)
+        const editId = this.route.snapshot.queryParams['editDepenseId'];
+        if (editId) {
+          const depenseToEdit = this.depenses.find(d => d.id === +editId);
+          if (depenseToEdit) {
+            this.chargerFormulaireEdition(depenseToEdit);
+            this.methodeJustificatif = 'televerser';
+
+            // Nettoyer l'URL
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { editDepenseId: null },
+              queryParamsHandling: 'merge'
+            });
+          }
+        }
       },
       error: () => {
         this.messageErreur = 'Erreur lors du chargement des dépenses.';

@@ -4,6 +4,8 @@ import fr.denebolar.tinygestion.domain.Logement;
 import fr.denebolar.tinygestion.domain.Recette;
 import fr.denebolar.tinygestion.domain.Utilisateur;
 import fr.denebolar.tinygestion.repository.RecetteRepository;
+import fr.denebolar.tinygestion.domain.DocumentJustificatif;
+import fr.denebolar.tinygestion.repository.DocumentJustificatifRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ public class RecetteService {
 
     private final RecetteRepository recetteRepository;
     private final LogementService logementService;
+    private final DocumentJustificatifRepository documentRepository;
 
     public List<Recette> getRecettesByLogement(Long logementId, Utilisateur user) {
         // Validation que le logement appartient à l'utilisateur
@@ -34,7 +37,19 @@ public class RecetteService {
         // Valider que le logement appartient à l'utilisateur
         Logement logement = logementService.getLogementById(recette.getLogement().getId(), user);
         recette.setLogement(logement);
-        return recetteRepository.save(recette);
+        Recette saved = recetteRepository.save(recette);
+
+        // Mettre à jour le justificatif si présent
+        if (recette.getDocumentJustificatif() != null && recette.getDocumentJustificatif().getId() != null) {
+            DocumentJustificatif doc = documentRepository.findById(recette.getDocumentJustificatif().getId())
+                    .orElseThrow(() -> new RuntimeException("Document introuvable"));
+            doc.setEntiteLieeType("RECETTE");
+            doc.setEntiteLieeId(saved.getId());
+            documentRepository.save(doc);
+            saved.setDocumentJustificatif(doc);
+        }
+
+        return saved;
     }
 
     @Transactional
@@ -51,6 +66,27 @@ public class RecetteService {
             recette.setLogement(nouveauLogement);
         }
 
+        // Gérer le changement de justificatif pour mettre à jour les métadonnées de liaison
+        if (recette.getDocumentJustificatif() != null && 
+            (recetteDetails.getDocumentJustificatif() == null || 
+             !recetteDetails.getDocumentJustificatif().getId().equals(recette.getDocumentJustificatif().getId()))) {
+            DocumentJustificatif ancienDoc = recette.getDocumentJustificatif();
+            ancienDoc.setEntiteLieeType(null);
+            ancienDoc.setEntiteLieeId(null);
+            documentRepository.save(ancienDoc);
+        }
+
+        if (recetteDetails.getDocumentJustificatif() != null) {
+            DocumentJustificatif nouveauDoc = documentRepository.findById(recetteDetails.getDocumentJustificatif().getId())
+                    .orElseThrow(() -> new RuntimeException("Document introuvable"));
+            nouveauDoc.setEntiteLieeType("RECETTE");
+            nouveauDoc.setEntiteLieeId(recette.getId());
+            documentRepository.save(nouveauDoc);
+            recette.setDocumentJustificatif(nouveauDoc);
+        } else {
+            recette.setDocumentJustificatif(null);
+        }
+
         recette.setPlateforme(recetteDetails.getPlateforme());
         recette.setNomClient(recetteDetails.getNomClient());
         recette.setDateDebutSejour(recetteDetails.getDateDebutSejour());
@@ -61,7 +97,6 @@ public class RecetteService {
         recette.setFraisPlateforme(recetteDetails.getFraisPlateforme());
         recette.setMontantTaxeSejour(recetteDetails.getMontantTaxeSejour());
         recette.setCommentaire(recetteDetails.getCommentaire());
-        recette.setDocumentJustificatif(recetteDetails.getDocumentJustificatif());
 
         return recetteRepository.save(recette);
     }

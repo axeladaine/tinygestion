@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FlatpickrDirective } from 'angularx-flatpickr';
+import { ActivatedRoute, Router } from '@angular/router';
 import { RecetteService } from '../../services/recette.service';
 import { LogementService } from '../../services/logement.service';
 import { DocumentJustificatifService } from '../../services/document-justificatif.service';
@@ -20,6 +21,8 @@ export class RecettesComponent implements OnInit {
   private recetteService = inject(RecetteService);
   private logementService = inject(LogementService);
   private docService = inject(DocumentJustificatifService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   logementActif: Logement | null = null;
   recettes: Recette[] = [];
@@ -124,6 +127,23 @@ export class RecettesComponent implements OnInit {
           return dateB - dateA; // Décroissant
         });
         this.chargement = false;
+
+        // Vérifier s'il y a un paramètre editRecetteId dans l'URL (redirection depuis le TBB)
+        const editId = this.route.snapshot.queryParams['editRecetteId'];
+        if (editId) {
+          const recetteToEdit = this.recettes.find(r => r.id === +editId);
+          if (recetteToEdit) {
+            this.chargerFormulaireEdition(recetteToEdit);
+            this.methodeJustificatif = 'televerser';
+
+            // Nettoyer l'URL
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { editRecetteId: null },
+              queryParamsHandling: 'merge'
+            });
+          }
+        }
       },
       error: () => {
         this.messageErreur = 'Erreur lors du chargement des recettes.';

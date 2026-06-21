@@ -4,6 +4,8 @@ import fr.denebolar.tinygestion.domain.Logement;
 import fr.denebolar.tinygestion.domain.Depense;
 import fr.denebolar.tinygestion.domain.Utilisateur;
 import fr.denebolar.tinygestion.repository.DepenseRepository;
+import fr.denebolar.tinygestion.domain.DocumentJustificatif;
+import fr.denebolar.tinygestion.repository.DocumentJustificatifRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ public class DepenseService {
 
     private final DepenseRepository depenseRepository;
     private final LogementService logementService;
+    private final DocumentJustificatifRepository documentRepository;
 
     public List<Depense> getDepensesByLogement(Long logementId, Utilisateur user) {
         logementService.getLogementById(logementId, user);
@@ -32,7 +35,19 @@ public class DepenseService {
     public Depense saveDepense(Depense depense, Utilisateur user) {
         Logement logement = logementService.getLogementById(depense.getLogement().getId(), user);
         depense.setLogement(logement);
-        return depenseRepository.save(depense);
+        Depense saved = depenseRepository.save(depense);
+
+        // Mettre à jour le justificatif si présent
+        if (depense.getDocumentJustificatif() != null && depense.getDocumentJustificatif().getId() != null) {
+            DocumentJustificatif doc = documentRepository.findById(depense.getDocumentJustificatif().getId())
+                    .orElseThrow(() -> new RuntimeException("Document introuvable"));
+            doc.setEntiteLieeType("DEPENSE");
+            doc.setEntiteLieeId(saved.getId());
+            documentRepository.save(doc);
+            saved.setDocumentJustificatif(doc);
+        }
+
+        return saved;
     }
 
     @Transactional
@@ -47,6 +62,27 @@ public class DepenseService {
             depense.setLogement(nouveauLogement);
         }
 
+        // Gérer le changement de justificatif pour mettre à jour les métadonnées de liaison
+        if (depense.getDocumentJustificatif() != null && 
+            (depenseDetails.getDocumentJustificatif() == null || 
+             !depenseDetails.getDocumentJustificatif().getId().equals(depense.getDocumentJustificatif().getId()))) {
+            DocumentJustificatif ancienDoc = depense.getDocumentJustificatif();
+            ancienDoc.setEntiteLieeType(null);
+            ancienDoc.setEntiteLieeId(null);
+            documentRepository.save(ancienDoc);
+        }
+
+        if (depenseDetails.getDocumentJustificatif() != null) {
+            DocumentJustificatif nouveauDoc = documentRepository.findById(depenseDetails.getDocumentJustificatif().getId())
+                    .orElseThrow(() -> new RuntimeException("Document introuvable"));
+            nouveauDoc.setEntiteLieeType("DEPENSE");
+            nouveauDoc.setEntiteLieeId(depense.getId());
+            documentRepository.save(nouveauDoc);
+            depense.setDocumentJustificatif(nouveauDoc);
+        } else {
+            depense.setDocumentJustificatif(null);
+        }
+
         depense.setDateDepense(depenseDetails.getDateDepense());
         depense.setFournisseur(depenseDetails.getFournisseur());
         depense.setCategorie(depenseDetails.getCategorie());
@@ -55,7 +91,6 @@ public class DepenseService {
         depense.setMoyenPaiement(depenseDetails.getMoyenPaiement());
         depense.setStatutDeductibilite(depenseDetails.getStatutDeductibilite());
         depense.setCommentaire(depenseDetails.getCommentaire());
-        depense.setDocumentJustificatif(depenseDetails.getDocumentJustificatif());
 
         return depenseRepository.save(depense);
     }

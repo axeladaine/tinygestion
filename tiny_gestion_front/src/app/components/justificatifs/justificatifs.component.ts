@@ -5,6 +5,10 @@ import { DocumentJustificatifService } from '../../services/document-justificati
 import { LogementService } from '../../services/logement.service';
 import { DocumentJustificatif } from '../../models/document-justificatif.model';
 import { Logement } from '../../models/logement.model';
+import { RecetteService } from '../../services/recette.service';
+import { DepenseService } from '../../services/depense.service';
+import { Recette } from '../../models/recette.model';
+import { Depense } from '../../models/depense.model';
 
 @Component({
   selector: 'app-justificatifs',
@@ -16,6 +20,15 @@ import { Logement } from '../../models/logement.model';
 export class JustificatifsComponent implements OnInit {
   private docService = inject(DocumentJustificatifService);
   private logementService = inject(LogementService);
+  private recetteService = inject(RecetteService);
+  private depenseService = inject(DepenseService);
+
+  // Variables de liaison
+  documentALier: DocumentJustificatif | null = null;
+  typeLiaison: 'RECETTE' | 'DEPENSE' = 'RECETTE';
+  operationSelectionneeId: number | null = null;
+  recettesSansJustif: Recette[] = [];
+  depensesSansJustif: Depense[] = [];
 
   logementActif: Logement | null = null;
   documents: DocumentJustificatif[] = [];
@@ -48,6 +61,7 @@ export class JustificatifsComponent implements OnInit {
         if (logements && logements.length > 0) {
           this.logementActif = logements[0];
           this.chargerDocuments();
+          this.chargerOperations();
         } else {
           this.chargement = false;
         }
@@ -55,6 +69,22 @@ export class JustificatifsComponent implements OnInit {
       error: () => {
         this.messageErreur = 'Erreur lors du chargement du logement.';
         this.chargement = false;
+      }
+    });
+  }
+
+  chargerOperations(): void {
+    if (!this.logementActif || !this.logementActif.id) return;
+    
+    this.recetteService.getRecettes(this.logementActif.id).subscribe({
+      next: (recettes) => {
+        this.recettesSansJustif = recettes.filter(r => !r.documentJustificatifId && !r.documentJustificatif);
+      }
+    });
+    
+    this.depenseService.getDepenses(this.logementActif.id).subscribe({
+      next: (depenses) => {
+        this.depensesSansJustif = depenses.filter(d => !d.documentJustificatifId && !d.documentJustificatif);
       }
     });
   }
@@ -158,5 +188,86 @@ export class JustificatifsComponent implements OnInit {
   getLabelType(type: string): string {
     const matched = this.typesDocument.find(t => t.value === type);
     return matched ? matched.label : type;
+  }
+
+  ouvrirLiaison(doc: DocumentJustificatif): void {
+    this.documentALier = doc;
+    this.typeLiaison = 'RECETTE';
+    this.operationSelectionneeId = null;
+    this.chargerOperations();
+    setTimeout(() => {
+      this.mettreAJourOperationParDefaut();
+    }, 200);
+  }
+
+  mettreAJourOperationParDefaut(): void {
+    if (this.typeLiaison === 'RECETTE' && this.recettesSansJustif.length > 0) {
+      this.operationSelectionneeId = this.recettesSansJustif[0].id || null;
+    } else if (this.typeLiaison === 'DEPENSE' && this.depensesSansJustif.length > 0) {
+      this.operationSelectionneeId = this.depensesSansJustif[0].id || null;
+    } else {
+      this.operationSelectionneeId = null;
+    }
+  }
+
+  changerTypeLiaison(type: 'RECETTE' | 'DEPENSE'): void {
+    this.typeLiaison = type;
+    this.mettreAJourOperationParDefaut();
+  }
+
+  annulerLiaison(): void {
+    this.documentALier = null;
+    this.operationSelectionneeId = null;
+  }
+
+  confirmerLiaison(): void {
+    if (!this.documentALier || !this.operationSelectionneeId) {
+      this.messageErreur = 'Veuillez sélectionner une opération valide.';
+      return;
+    }
+
+    this.sauvegardeEnCours = true;
+    this.messageSucces = null;
+    this.messageErreur = null;
+
+    if (this.typeLiaison === 'RECETTE') {
+      const recette = this.recettesSansJustif.find(r => r.id === this.operationSelectionneeId);
+      if (recette) {
+        recette.documentJustificatif = this.documentALier;
+        this.recetteService.updateRecette(recette.id!, recette).subscribe({
+          next: () => {
+            this.sauvegardeEnCours = false;
+            this.messageSucces = 'Le justificatif a été associé à la recette avec succès !';
+            this.documentALier = null;
+            this.chargerDocuments();
+            this.chargerOperations();
+            setTimeout(() => this.messageSucces = null, 3000);
+          },
+          error: () => {
+            this.sauvegardeEnCours = false;
+            this.messageErreur = 'Erreur lors de la liaison à la recette.';
+          }
+        });
+      }
+    } else if (this.typeLiaison === 'DEPENSE') {
+      const depense = this.depensesSansJustif.find(d => d.id === this.operationSelectionneeId);
+      if (depense) {
+        depense.documentJustificatif = this.documentALier;
+        this.depenseService.updateDepense(depense.id!, depense).subscribe({
+          next: () => {
+            this.sauvegardeEnCours = false;
+            this.messageSucces = 'Le justificatif a été associé à la dépense avec succès !';
+            this.documentALier = null;
+            this.chargerDocuments();
+            this.chargerOperations();
+            setTimeout(() => this.messageSucces = null, 3000);
+          },
+          error: () => {
+            this.sauvegardeEnCours = false;
+            this.messageErreur = 'Erreur lors de la liaison à la dépense.';
+          }
+        });
+      }
+    }
   }
 }
