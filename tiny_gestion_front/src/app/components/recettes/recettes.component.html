@@ -34,7 +34,7 @@
     <!-- Formulaire d'Ajout (Masqué par défaut) -->
     @if (afficherFormulaire) {
       <div class="card-section form-card">
-        <h3>Saisir une Réservation</h3>
+        <h3>{{ modeEdition ? 'Modifier la Réservation' : 'Saisir une Réservation' }}</h3>
         
         <form (ngSubmit)="onSubmit()" #recetteForm="ngForm" class="fiche-form">
           
@@ -96,13 +96,29 @@
           </div>
 
           <div class="form-group">
-            <label for="doc">Relevé de plateforme / Justificatif lié</label>
-            <select id="doc" name="doc" [(ngModel)]="nouvelleRecette.documentJustificatif" style="height: 52px; width: 100%; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 1.05rem; padding: 0.85rem 1.1rem; background-color: white;">
-              <option [ngValue]="null">-- Aucun justificatif lié --</option>
-              @for (d of documents; track d.id) {
-                <option [ngValue]="d">{{ d.nomFichier }}</option>
-              }
-            </select>
+            <label>Justificatif de la réservation</label>
+            <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; text-transform: none; font-weight: 500; cursor: pointer;">
+                <input type="radio" name="methodeJustificatif" [(ngModel)]="methodeJustificatif" value="lier" style="width: auto; height: auto; box-shadow: none;">
+                <span>Lier un document existant</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; text-transform: none; font-weight: 500; cursor: pointer;">
+                <input type="radio" name="methodeJustificatif" [(ngModel)]="methodeJustificatif" value="televerser" style="width: auto; height: auto; box-shadow: none;">
+                <span>Téléverser un nouveau fichier</span>
+              </label>
+            </div>
+
+            @if (methodeJustificatif === 'lier') {
+              <select id="doc" name="doc" [(ngModel)]="nouvelleRecette.documentJustificatif" style="height: 52px; width: 100%; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 1.05rem; padding: 0.85rem 1.1rem; background-color: white;">
+                <option [ngValue]="null">-- Aucun justificatif lié --</option>
+                @for (d of documents; track d.id) {
+                  <option [ngValue]="d">{{ d.nomFichier }}</option>
+                }
+              </select>
+            } @else {
+              <input type="file" (change)="onFichierSelectionne($event)" accept=".pdf,.png,.jpg,.jpeg" style="height: auto; padding: 0.5rem; border: 2px dashed #cbd5e1; border-radius: 12px; background: white; font-size: 0.95rem;">
+              <small style="color: #64748b;">Formats acceptés : PDF, PNG, JPG (10 Mo maximum).</small>
+            }
           </div>
 
           <!-- Récapitulatif du calcul (Widget interactif) -->
@@ -126,14 +142,21 @@
             </div>
           </div>
 
-          <button type="submit" [disabled]="recetteForm.invalid || sauvegardeEnCours" class="btn-primary w-100">
-            @if (sauvegardeEnCours) {
-              <span class="spinner"></span>
-              <span>Enregistrement...</span>
-            } @else {
-              <span>Enregistrer la recette</span>
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button type="submit" [disabled]="recetteForm.invalid || sauvegardeEnCours" class="btn-primary" style="flex: 1;">
+              @if (sauvegardeEnCours) {
+                <span class="spinner"></span>
+                <span>Enregistrement...</span>
+              } @else {
+                <span>{{ modeEdition ? 'Enregistrer les modifications' : 'Enregistrer la recette' }}</span>
+              }
+            </button>
+            @if (modeEdition) {
+              <button type="button" (click)="annulerEdition(); toggleFormulaire()" class="btn-secondary" style="border: 2px solid #cbd5e1; background: white; border-radius: 12px; font-weight: 700; cursor: pointer; padding: 0.85rem 1.5rem; height: 52px; color: #475569;">
+                Annuler
+              </button>
             }
-          </button>
+          </div>
 
         </form>
       </div>
@@ -180,15 +203,19 @@
                   <p class="recette-comment">" {{ r.commentaire }} "</p>
                 }
 
-                <div class="recette-footer" style="display: flex; gap: 1rem; align-items: center;">
+                <div class="recette-footer" style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem; flex-wrap: wrap;">
                   @if (r.documentJustificatif) {
                     <button type="button" (click)="telechargerJustificatif(r.documentJustificatif)" class="btn-download-item" style="display: flex; align-items: center; gap: 0.5rem; background: #f0fdfa; border: 1px solid #ccfbf1; color: #0d9488; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; height: 42px;">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
                       <span>Justificatif</span>
                     </button>
                   }
-                  <button (click)="supprimer(r.id)" class="btn-delete-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="delete-icon"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  <button (click)="chargerFormulaireEdition(r)" class="btn-edit-item" style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; height: 42px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span>Modifier</span>
+                  </button>
+                  <button (click)="supprimer(r.id)" class="btn-delete-item" style="display: flex; align-items: center; gap: 0.5rem; background: #fef2f2; border: 1px solid #fee2e2; color: #b91c1c; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; height: 42px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="delete-icon" style="width: 16px; height: 16px;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                     <span>Supprimer</span>
                   </button>
                 </div>

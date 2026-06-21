@@ -30,6 +30,12 @@ export class RecettesComponent implements OnInit {
   messageErreur: string | null = null;
   sauvegardeEnCours: boolean = false;
 
+  // Variables pour la modification et l'upload en direct
+  modeEdition: boolean = false;
+  recetteIdEnCours: number | null = null;
+  methodeJustificatif: 'lier' | 'televerser' = 'lier';
+  fichierSelectionne: File | null = null;
+
   // Formulaire Recette
   nouvelleRecette: Recette = this.getResetRecetteForm();
 
@@ -129,7 +135,41 @@ export class RecettesComponent implements OnInit {
   toggleFormulaire(): void {
     this.afficherFormulaire = !this.afficherFormulaire;
     if (!this.afficherFormulaire) {
-      this.nouvelleRecette = this.getResetRecetteForm();
+      this.annulerEdition();
+    }
+  }
+
+  chargerFormulaireEdition(recette: Recette): void {
+    this.modeEdition = true;
+    this.recetteIdEnCours = recette.id || null;
+    this.nouvelleRecette = { ...recette };
+    this.methodeJustificatif = 'lier';
+    this.fichierSelectionne = null;
+    this.afficherFormulaire = true;
+
+    if (this.nouvelleRecette.dateDebutSejour) {
+      this.nouvelleRecette.dateDebutSejour = this.nouvelleRecette.dateDebutSejour.split('T')[0];
+    }
+    if (this.nouvelleRecette.dateFinSejour) {
+      this.nouvelleRecette.dateFinSejour = this.nouvelleRecette.dateFinSejour.split('T')[0];
+    }
+    if (this.nouvelleRecette.dateEncaissement) {
+      this.nouvelleRecette.dateEncaissement = this.nouvelleRecette.dateEncaissement.split('T')[0];
+    }
+  }
+
+  annulerEdition(): void {
+    this.modeEdition = false;
+    this.recetteIdEnCours = null;
+    this.nouvelleRecette = this.getResetRecetteForm();
+    this.methodeJustificatif = 'lier';
+    this.fichierSelectionne = null;
+  }
+
+  onFichierSelectionne(event: any): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.fichierSelectionne = input.files[0];
     }
   }
 
@@ -161,19 +201,57 @@ export class RecettesComponent implements OnInit {
     this.nouvelleRecette.logement = { id: this.logementActif.id };
     this.nouvelleRecette.montantNetRecu = this.montantNetCalcule;
 
-    this.recetteService.saveRecette(this.nouvelleRecette).subscribe({
-      next: () => {
-        this.sauvegardeEnCours = false;
-        this.messageSucces = 'Recette ajoutée avec succès !';
-        this.toggleFormulaire();
-        this.chargerRecettes();
-        setTimeout(() => this.messageSucces = null, 3000);
-      },
-      error: () => {
-        this.sauvegardeEnCours = false;
-        this.messageErreur = "Une erreur est survenue lors de l'enregistrement.";
-      }
-    });
+    // Téléverser d'abord si sélectionné
+    if (this.methodeJustificatif === 'televerser' && this.fichierSelectionne) {
+      this.docService.televerser(this.fichierSelectionne, this.logementActif.id, 'RELEVE_PLATEFORME').subscribe({
+        next: (doc) => {
+          this.nouvelleRecette.documentJustificatif = doc;
+          this.sauvegarderEntite();
+        },
+        error: () => {
+          this.sauvegardeEnCours = false;
+          this.messageErreur = "Erreur lors du téléversement du justificatif.";
+        }
+      });
+    } else {
+      this.sauvegarderEntite();
+    }
+  }
+
+  private sauvegarderEntite(): void {
+    if (this.modeEdition && this.recetteIdEnCours) {
+      this.recetteService.updateRecette(this.recetteIdEnCours, this.nouvelleRecette).subscribe({
+        next: () => {
+          this.sauvegardeEnCours = false;
+          this.messageSucces = 'Recette modifiée avec succès !';
+          this.afficherFormulaire = false;
+          this.annulerEdition();
+          this.chargerRecettes();
+          this.chargerDocuments();
+          setTimeout(() => this.messageSucces = null, 3000);
+        },
+        error: () => {
+          this.sauvegardeEnCours = false;
+          this.messageErreur = "Une erreur est survenue lors de la modification.";
+        }
+      });
+    } else {
+      this.recetteService.saveRecette(this.nouvelleRecette).subscribe({
+        next: () => {
+          this.sauvegardeEnCours = false;
+          this.messageSucces = 'Recette ajoutée avec succès !';
+          this.afficherFormulaire = false;
+          this.annulerEdition();
+          this.chargerRecettes();
+          this.chargerDocuments();
+          setTimeout(() => this.messageSucces = null, 3000);
+        },
+        error: () => {
+          this.sauvegardeEnCours = false;
+          this.messageErreur = "Une erreur est survenue lors de l'enregistrement.";
+        }
+      });
+    }
   }
 
   supprimer(id: number | undefined): void {

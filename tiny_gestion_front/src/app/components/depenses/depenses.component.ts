@@ -30,6 +30,12 @@ export class DepensesComponent implements OnInit {
   messageErreur: string | null = null;
   sauvegardeEnCours: boolean = false;
 
+  // Variables pour la modification et l'upload en direct
+  modeEdition: boolean = false;
+  depenseIdEnCours: number | null = null;
+  methodeJustificatif: 'lier' | 'televerser' = 'lier';
+  fichierSelectionne: File | null = null;
+
   // Formulaire Dépense
   nouvelleDepense: Depense = this.getResetDepenseForm();
 
@@ -140,7 +146,35 @@ export class DepensesComponent implements OnInit {
   toggleFormulaire(): void {
     this.afficherFormulaire = !this.afficherFormulaire;
     if (!this.afficherFormulaire) {
-      this.nouvelleDepense = this.getResetDepenseForm();
+      this.annulerEdition();
+    }
+  }
+
+  chargerFormulaireEdition(depense: Depense): void {
+    this.modeEdition = true;
+    this.depenseIdEnCours = depense.id || null;
+    this.nouvelleDepense = { ...depense };
+    this.methodeJustificatif = 'lier';
+    this.fichierSelectionne = null;
+    this.afficherFormulaire = true;
+
+    if (this.nouvelleDepense.dateDepense) {
+      this.nouvelleDepense.dateDepense = this.nouvelleDepense.dateDepense.split('T')[0];
+    }
+  }
+
+  annulerEdition(): void {
+    this.modeEdition = false;
+    this.depenseIdEnCours = null;
+    this.nouvelleDepense = this.getResetDepenseForm();
+    this.methodeJustificatif = 'lier';
+    this.fichierSelectionne = null;
+  }
+
+  onFichierSelectionne(event: any): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.fichierSelectionne = input.files[0];
     }
   }
 
@@ -161,19 +195,57 @@ export class DepensesComponent implements OnInit {
     this.nouvelleDepense.logement = { id: this.logementActif.id };
     this.nouvelleDepense.montantRetenu = this.montantRetenuCalcule;
 
-    this.depenseService.saveDepense(this.nouvelleDepense).subscribe({
-      next: () => {
-        this.sauvegardeEnCours = false;
-        this.messageSucces = 'Dépense ajoutée avec succès !';
-        this.toggleFormulaire();
-        this.chargerDepenses();
-        setTimeout(() => this.messageSucces = null, 3000);
-      },
-      error: () => {
-        this.sauvegardeEnCours = false;
-        this.messageErreur = "Une erreur est survenue lors de l'enregistrement.";
-      }
-    });
+    // Téléverser d'abord si sélectionné
+    if (this.methodeJustificatif === 'televerser' && this.fichierSelectionne) {
+      this.docService.televerser(this.fichierSelectionne, this.logementActif.id, 'FACTURE').subscribe({
+        next: (doc) => {
+          this.nouvelleDepense.documentJustificatif = doc;
+          this.sauvegarderEntite();
+        },
+        error: () => {
+          this.sauvegardeEnCours = false;
+          this.messageErreur = "Erreur lors du téléversement du justificatif.";
+        }
+      });
+    } else {
+      this.sauvegarderEntite();
+    }
+  }
+
+  private sauvegarderEntite(): void {
+    if (this.modeEdition && this.depenseIdEnCours) {
+      this.depenseService.updateDepense(this.depenseIdEnCours, this.nouvelleDepense).subscribe({
+        next: () => {
+          this.sauvegardeEnCours = false;
+          this.messageSucces = 'Dépense modifiée avec succès !';
+          this.afficherFormulaire = false;
+          this.annulerEdition();
+          this.chargerDepenses();
+          this.chargerDocuments();
+          setTimeout(() => this.messageSucces = null, 3000);
+        },
+        error: () => {
+          this.sauvegardeEnCours = false;
+          this.messageErreur = "Une erreur est survenue lors de la modification.";
+        }
+      });
+    } else {
+      this.depenseService.saveDepense(this.nouvelleDepense).subscribe({
+        next: () => {
+          this.sauvegardeEnCours = false;
+          this.messageSucces = 'Dépense ajoutée avec succès !';
+          this.afficherFormulaire = false;
+          this.annulerEdition();
+          this.chargerDepenses();
+          this.chargerDocuments();
+          setTimeout(() => this.messageSucces = null, 3000);
+        },
+        error: () => {
+          this.sauvegardeEnCours = false;
+          this.messageErreur = "Une erreur est survenue lors de l'enregistrement.";
+        }
+      });
+    }
   }
 
   supprimer(id: number | undefined): void {
