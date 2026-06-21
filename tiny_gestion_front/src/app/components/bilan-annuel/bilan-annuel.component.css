@@ -569,3 +569,48 @@
     width: 100%;
   }
 }
+
+/* Styles pour l'aide fiscale */
+.tax-help-card {
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color) !important;
+}
+
+.tax-help-card.highlighted {
+  border: 2px solid var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(13, 148, 136, 0.1), 0 4px 6px -2px rgba(13, 148, 136, 0.05) !important;
+}
+
+.tax-help-card.highlighted:first-child {
+  border-color: var(--green) !important;
+  box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.1), 0 4px 6px -2px rgba(22, 163, 74, 0.05) !important;
+}
+
+.fiscal-box-badge {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-block;
+  box-shadow: var(--shadow-sm);
+}
+
+.fiscal-box-badge.fiscal-green {
+  background-color: var(--green) !important;
+}
+
+.fiscal-box-badge.fiscal-red {
+  background-color: var(--red) !important;
+}
+
+.fiscal-box-badge.fiscal-blue {
+  background-color: #0284c7 !important;
+}
+
+.cfe-section {
+  transition: all 0.3s ease;
+}
