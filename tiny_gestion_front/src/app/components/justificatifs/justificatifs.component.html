@@ -1,0 +1,174 @@
+<div class="page-container">
+  <!-- Titre et introduction -->
+  <div class="header-section">
+    <div>
+      <h1>Justificatifs et Documents</h1>
+      <p class="subtitle">Stockez et gérez les factures, contrats et reçus de votre Tiny House de manière sécurisée.</p>
+    </div>
+  </div>
+
+  @if (messageSucces) {
+    <div class="alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <span>{{ messageSucces }}</span>
+    </div>
+  }
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" x2="12" y1="8" y2="12"/>
+        <line x1="12" x2="12.01" y1="16" y2="16"/>
+      </svg>
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  <!-- Section de dépôt de fichier -->
+  <div class="upload-card">
+    <h3>Ajouter un nouveau justificatif</h3>
+    <form (ngSubmit)="onSubmit()" #uploadForm="ngForm" class="upload-form">
+      <div class="form-row">
+        <div class="form-group col-6">
+          <label for="fichierInput">Sélectionner un fichier (PDF, PNG, JPG - 10Mo max) *</label>
+          <input 
+            type="file" 
+            id="fichierInput" 
+            (change)="onFileSelected($event)" 
+            required
+            class="file-input"
+            accept=".pdf,.png,.jpg,.jpeg"
+          />
+        </div>
+        <div class="form-group col-6">
+          <label for="typeDoc">Catégorie du document *</label>
+          <select 
+            id="typeDoc" 
+            name="typeDoc" 
+            [(ngModel)]="typeDocumentSelectionne"
+            required
+            class="type-select"
+          >
+            @for (type of typesDocument; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button type="submit" [disabled]="!fichierSelectionne || sauvegardeEnCours" class="btn btn-primary">
+          @if (sauvegardeEnCours) {
+            <span class="spinner"></span>
+            <span>Téléversement en cours...</span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+            <span>Envoyer le fichier</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Liste des documents -->
+  <div class="documents-card">
+    <h3>Vos documents archivés</h3>
+    
+    @if (chargement) {
+      <div class="loader-container">
+        <span class="page-spinner"></span>
+        <p>Chargement de vos documents...</p>
+      </div>
+    } @else if (documents.length === 0) {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+          <path d="M10 9H8"/>
+          <path d="M16 13H8"/>
+          <path d="M16 17H8"/>
+        </svg>
+        <p>Aucun document téléversé pour le moment.</p>
+        <p class="sub-empty">Utilisez le formulaire ci-dessus pour stocker vos factures ou relevés.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="documents-table">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Catégorie</th>
+              <th>Liaison</th>
+              <th>Date d'envoi</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (doc of documents; track doc.id) {
+              <tr>
+                <td class="doc-name-cell">
+                  <div class="file-icon-box">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="table-file-icon">
+                      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                      <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                    </svg>
+                  </div>
+                  <span class="file-name" [title]="doc.nomFichier">{{ doc.nomFichier }}</span>
+                </td>
+                <td>
+                  <span class="category-badge">{{ getLabelType(doc.typeDocument) }}</span>
+                </td>
+                <td>
+                  @if (doc.entiteLieeType) {
+                    <span class="link-info">
+                      @if (doc.entiteLieeType === 'RECETTE') {
+                        Réservation #{{ doc.entiteLieeId }}
+                      } @else if (doc.entiteLieeType === 'DEPENSE') {
+                        Dépense #{{ doc.entiteLieeId }}
+                      } @else if (doc.entiteLieeType === 'BIEN') {
+                        Bien Amortissable #{{ doc.entiteLieeId }}
+                      } @else {
+                        {{ doc.entiteLieeType }} #{{ doc.entiteLieeId }}
+                      }
+                    </span>
+                  } @else {
+                    <span class="no-link">Non lié</span>
+                  }
+                </td>
+                <td class="date-cell">
+                  {{ doc.dateTeleversement | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="actions-cell">
+                  <button (click)="telecharger(doc)" class="btn-action btn-download" title="Télécharger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" x2="12" y1="15" y2="3"/>
+                    </svg>
+                  </button>
+                  <button (click)="supprimer(doc.id)" class="btn-action btn-delete" title="Supprimer">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      <line x1="10" x2="10" y1="11" y2="17"/>
+                      <line x1="14" x2="14" y1="11" y2="17"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

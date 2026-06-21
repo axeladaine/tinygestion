@@ -1,0 +1,571 @@
+.page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header-section {
+  margin-bottom: 2rem;
+}
+
+.header-title-area h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.section-desc {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Filters */
+.filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.logement-info-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  border: 1px solid var(--primary-border);
+  height: 42px;
+  box-sizing: border-box;
+}
+
+.badge-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.date-filters {
+  display: flex;
+  gap: 1rem;
+}
+
+.select-field {
+  padding: 0.6rem 2rem 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-family: var(--font-main);
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  outline: none;
+  min-width: 160px;
+  height: 42px;
+  box-sizing: border-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+/* Advice Card */
+.advice-card {
+  display: flex;
+  gap: 1.25rem;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid transparent;
+}
+
+.advice-card.reel-avantageux {
+  background-color: var(--primary-light);
+  border-color: var(--primary-border);
+}
+
+.advice-card.reel-avantageux .advice-icon-wrapper {
+  background-color: var(--primary);
+  color: white;
+}
+
+.advice-card.reel-avantageux h4 {
+  color: var(--primary-hover);
+}
+
+.advice-card.micro-bic-avantageux {
+  background-color: var(--green-dim);
+  border-color: var(--green-border);
+}
+
+.advice-card.micro-bic-avantageux .advice-icon-wrapper {
+  background-color: var(--green);
+  color: white;
+}
+
+.advice-card.micro-bic-avantageux h4 {
+  color: var(--green);
+}
+
+.advice-card.equivalent {
+  background-color: #f8fafc;
+  border-color: var(--border-color);
+}
+
+.advice-card.equivalent .advice-icon-wrapper {
+  background-color: var(--text-muted);
+  color: white;
+}
+
+.advice-card.equivalent h4 {
+  color: var(--text-primary);
+}
+
+.advice-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.advice-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.advice-content h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.advice-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.advice-content strong {
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+/* Comparison Grid */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.regime-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.regime-card.recommended {
+  border-color: var(--primary);
+  box-shadow: 0 10px 25px rgba(13, 148, 136, 0.05), var(--shadow-md);
+}
+
+.regime-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.regime-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.recommendation-badge {
+  background-color: var(--primary);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.tax-base-box {
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.tax-base-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.tax-base-value {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary-hover);
+}
+
+.regime-card.recommended .tax-base-value {
+  color: var(--primary);
+}
+
+.formula-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.formula-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.formula-row.border-sub {
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.5rem 0;
+  margin: 0.25rem 0;
+}
+
+.formula-row .label {
+  font-weight: 500;
+}
+
+.formula-row .value {
+  font-weight: 600;
+}
+
+.label-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.text-plus {
+  color: var(--green);
+}
+
+.text-minus {
+  color: var(--red);
+}
+
+.font-bold {
+  font-weight: 700 !important;
+}
+
+/* Amortissement report box */
+.amortissement-report-box {
+  background-color: var(--primary-light);
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-top: auto;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.report-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.report-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-hover);
+  margin-bottom: 0.5rem;
+}
+
+.report-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Micro-BIC info box */
+.micro-bic-info-box {
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-top: auto;
+}
+
+.info-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Table Section */
+.breakdown-section {
+  margin-bottom: 2.5rem;
+}
+
+.breakdown-section h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.table-container {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th, .data-table td {
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+}
+
+.data-table th {
+  background-color: #f8fafc;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.data-table td {
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-teal {
+  color: var(--primary);
+}
+
+.highlight-row {
+  background-color: #f8fafc;
+}
+
+.highlight-row td {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Legal Warning Card */
+.legal-warning-card {
+  display: flex;
+  gap: 1.25rem;
+  background-color: var(--orange-dim);
+  border: 1px solid var(--orange-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.warning-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--orange);
+  color: white;
+  flex-shrink: 0;
+}
+
+.warning-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.warning-content h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+.warning-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.warning-content a {
+  color: var(--orange);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.warning-content a:hover {
+  color: #9a3412;
+}
+
+/* Loading container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(13, 148, 136, 0.1);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.no-logement-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.no-logement-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.no-logement-card h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+}
+
+.no-logement-card p {
+  color: var(--text-muted);
+  margin: 0 0 1.5rem 0;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: var(--font-main);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .logement-info-badge {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .select-field {
+    width: 100%;
+  }
+}

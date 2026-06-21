@@ -1,0 +1,245 @@
+<div class="page-container">
+  <!-- Header -->
+  <header class="header-section">
+    <div class="header-title-area">
+      <h2>Bilan Fiscal & Arbitrage</h2>
+      <p class="section-desc">
+        Comparez le régime Réel et le Micro-BIC pour optimiser vos impôts LMNP.
+      </p>
+    </div>
+  </header>
+
+  <!-- Error display -->
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" x2="12" y1="8" y2="12" />
+        <line x1="12" x2="12.01" y1="16" y2="16" />
+      </svg>
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (chargement) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Calcul et simulation en cours...</p>
+    </div>
+  } @else {
+    @if (!logementActif) {
+      <div class="no-logement-card">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="no-logement-icon">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <h3>Aucun logement configuré</h3>
+        <p>Veuillez d'abord configurer une Tiny House dans l'onglet Logement.</p>
+        <button [routerLink]="['/logement']" class="btn-primary">Créer ma Tiny House</button>
+      </div>
+    } @else if (bilan) {
+      <!-- Period Selector / Filter Area -->
+      <section class="filter-section">
+        <div class="filter-group">
+          <label>Logement Actif</label>
+          <div class="logement-info-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="badge-icon">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span>{{ logementActif.nom }}</span>
+          </div>
+        </div>
+
+        <div class="date-filters">
+          <div class="filter-group">
+            <label for="annee">Année d'imposition</label>
+            <select id="annee" [(ngModel)]="anneeSelectionnee" (change)="onAnneeChange()" class="select-field">
+              @for (a of listeAnnees; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Arbitrage Advice Card -->
+      <div class="advice-card" 
+           [class.reel-avantageux]="bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX'"
+           [class.micro-bic-avantageux]="bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX'"
+           [class.equivalent]="bilan.regimeFiscalConseille === 'EQUIVALENT'">
+        <div class="advice-icon-wrapper">
+          @if (bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX') {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="advice-icon">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          } @else if (bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX') {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="advice-icon">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="advice-icon">
+              <circle cx="12" cy="12" r="10"/><path d="M16 12H8"/>
+            </svg>
+          }
+        </div>
+        <div class="advice-content">
+          @if (bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX') {
+            <h4>Recommandation : Régime Réel Simplifié</h4>
+            <p>
+              Le régime Réel est plus avantageux cette année. L'assiette de vos revenus imposables est réduite de 
+              <strong>{{ bilan.differenceGainImposable | number:'1.2-2' }} €</strong> par rapport au Micro-BIC grâce à la déduction de vos charges réelles et de vos amortissements.
+            </p>
+          } @else if (bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX') {
+            <h4>Recommandation : Régime Micro-BIC</h4>
+            <p>
+              Le régime Micro-BIC est plus avantageux cette année. L'assiette de vos revenus imposables est inférieure de 
+              <strong>{{ bilan.differenceGainImposable | number:'1.2-2' }} €</strong> par rapport au régime Réel grâce à l'abattement forfaitaire de {{ bilan.estMeubleTourisme ? '71%' : '50%' }}.
+            </p>
+          } @else {
+            <h4>Régimes équivalents</h4>
+            <p>Les deux régimes fiscaux conduisent à une assiette imposable équivalente.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Regime Comparison Columns -->
+      <div class="comparison-grid">
+        <!-- Regime Reel Card -->
+        <div class="regime-card" [class.recommended]="bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX'">
+          <div class="regime-card-header">
+            <span class="regime-title">Régime Réel Simplifié</span>
+            @if (bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX') {
+              <span class="recommendation-badge">Recommandé</span>
+            }
+          </div>
+          
+          <div class="tax-base-box">
+            <span class="tax-base-label">Assiette Imposable LMNP</span>
+            <span class="tax-base-value">{{ bilan.resultatReelImposable | number:'1.2-2' }} €</span>
+          </div>
+
+          <div class="formula-details">
+            <div class="formula-row">
+              <span class="label">Recettes brutes (Loyers)</span>
+              <span class="value text-plus">+ {{ bilan.recettesBrutes | number:'1.2-2' }} €</span>
+            </div>
+            <div class="formula-row">
+              <span class="label">Dépenses réelles déductibles</span>
+              <span class="value text-minus">- {{ bilan.depensesRetenues | number:'1.2-2' }} €</span>
+            </div>
+            <div class="formula-row border-sub">
+              <span class="label font-bold">Résultat avant amortissement</span>
+              <span class="value font-bold">{{ bilan.resultatAvantAmortissement | number:'1.2-2' }} €</span>
+            </div>
+            <div class="formula-row">
+              <div class="label-info">
+                <span class="label">Amortissement utilisé</span>
+                <span class="detail-note">(plafonné au résultat)</span>
+              </div>
+              <span class="value text-minus">- {{ bilan.amortissementUtilise | number:'1.2-2' }} €</span>
+            </div>
+          </div>
+
+          <div class="amortissement-report-box">
+            <div class="report-header">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="report-icon">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Amortissement non utilisé (reportable)</span>
+            </div>
+            <div class="report-value">{{ bilan.amortissementNonUtilise | number:'1.2-2' }} €</div>
+            <p class="report-desc">Cet amortissement excédentaire est stocké et pourra être déduit de vos bénéfices au cours des années suivantes sans limite de temps.</p>
+          </div>
+        </div>
+
+        <!-- Regime Micro-BIC Card -->
+        <div class="regime-card" [class.recommended]="bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX'">
+          <div class="regime-card-header">
+            <span class="regime-title">Régime Micro-BIC</span>
+            @if (bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX') {
+              <span class="recommendation-badge">Recommandé</span>
+            }
+          </div>
+          
+          <div class="tax-base-box">
+            <span class="tax-base-label">Assiette Imposable LMNP</span>
+            <span class="tax-base-value">{{ bilan.resultatMicroBicImposable | number:'1.2-2' }} €</span>
+          </div>
+
+          <div class="formula-details">
+            <div class="formula-row">
+              <span class="label">Recettes brutes (Loyers)</span>
+              <span class="value text-plus">+ {{ bilan.recettesBrutes | number:'1.2-2' }} €</span>
+            </div>
+            <div class="formula-row">
+              <div class="label-info">
+                <span class="label">Abattement forfaitaire</span>
+                <span class="detail-note">({{ bilan.estMeubleTourisme ? '71%' : '50%' }} - {{ bilan.estMeubleTourisme ? 'Meublé de tourisme classé' : 'Meublé classique' }})</span>
+              </div>
+              <span class="value text-minus">- {{ bilan.abattementMicroBic | number:'1.2-2' }} €</span>
+            </div>
+          </div>
+
+          <div class="micro-bic-info-box">
+            <p class="info-desc">Sous le régime Micro-BIC, vous ne pouvez déduire aucune charge réelle ni aucun amortissement. L'État applique directement cet abattement représentatif de vos frais.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Table Breakdown -->
+      <section class="breakdown-section">
+        <h3>Récapitulatif Annuel des Flux</h3>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Indicateur</th>
+                <th class="text-right">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total des recettes brutes de l'année (Loyers encaissés)</td>
+                <td class="text-right font-bold">{{ bilan.recettesBrutes | number:'1.2-2' }} €</td>
+              </tr>
+              <tr>
+                <td>Dépenses réelles affectées à l'activité</td>
+                <td class="text-right text-minus">- {{ bilan.depensesRetenues | number:'1.2-2' }} €</td>
+              </tr>
+              <tr>
+                <td>Dotation aux amortissements disponible pour cette année</td>
+                <td class="text-right text-minus">- {{ bilan.amortissementDisponible | number:'1.2-2' }} €</td>
+              </tr>
+              <tr class="highlight-row">
+                <td>Amortissement effectivement utilisé pour effacer le résultat</td>
+                <td class="text-right font-bold text-minus">- {{ bilan.amortissementUtilise | number:'1.2-2' }} €</td>
+              </tr>
+              <tr>
+                <td>Report d'amortissement non utilisé à reporter sur N+1</td>
+                <td class="text-right text-teal font-bold">+ {{ bilan.amortissementNonUtilise | number:'1.2-2' }} €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Legal Warning -->
+      <div class="legal-warning-card">
+        <div class="warning-icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="warning-icon">
+            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="warning-content">
+          <h5>Avertissement Légal & Fiscal</h5>
+          <p>
+            Le bilan fiscal annuel fourni par cette application est estimatif et indicatif. Il a pour but de vous aider à faire votre arbitrage fiscal (Réel Simplifié vs Micro-BIC). 
+            Pour vos déclarations fiscales officielles de revenus (déclaration de revenus 2042-C-PRO, déclaration de résultat 2031 et annexes 2033), 
+            veuillez valider les calculs auprès d'un expert-comptable ou vous référer au site officiel <a href="https://www.impots.gouv.fr" target="_blank" rel="noopener noreferrer">impots.gouv.fr</a>.
+          </p>
+        </div>
+      </div>
+    }
+  }
+</div>

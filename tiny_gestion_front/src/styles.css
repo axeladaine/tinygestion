@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import 'flatpickr/dist/flatpickr.css';
+
+
+:root {
+  /* Color Palette - Light, Soft & Premium */
+  --bg-primary: #f8fafc;        /* Soft slate/off-white */
+  --bg-secondary: #ffffff;      /* Pure white for cards */
+  --border-color: #e2e8f0;      /* Light border */
+  
+  --text-primary: #0f172a;      /* Dark slate for maximum contrast/readability */
+  --text-secondary: #334155;    /* Medium slate for secondary text */
+  --text-muted: #64748b;        /* Muted slate for explanations */
+  
+  --primary: #0d9488;           /* Teal for main actions */
+  --primary-hover: #0f766e;
+  --primary-light: #f0fdfa;     /* Very light teal background */
+  --primary-border: #ccfbf1;
+  
+  --green: #15803d;             /* Darker green for high contrast text */
+  --green-dim: #f0fdf4;
+  --green-border: #bbf7d0;
+  
+  --red: #b91c1c;               /* Darker red for high contrast text */
+  --red-dim: #fef2f2;
+  --red-border: #fee2e2;
+  
+  --orange: #c2410c;            /* Darker orange for alerts */
+  --orange-dim: #fff7ed;
+  --orange-border: #ffedd5;
+  
+  --amber: #b45309;
+  --amber-dim: #fefbeb;
+  --amber-border: #fef3c7;
+
+  --font-main: 'Outfit', 'Inter', -apple-system, sans-serif;
+  
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.02);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.05);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global scrollbar adjustments */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Overrides Flatpickr to match teal theme */
+.flatpickr-calendar {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--border-color) !important;
+  font-family: var(--font-main) !important;
+  background-color: var(--bg-secondary) !important;
+}
+.flatpickr-day.selected, 
+.flatpickr-day.startRange, 
+.flatpickr-day.endRange, 
+.flatpickr-day.selected.inRange, 
+.flatpickr-day.startRange.inRange, 
+.flatpickr-day.endRange.inRange, 
+.flatpickr-day.selected:focus, 
+.flatpickr-day.startRange:focus, 
+.flatpickr-day.endRange:focus, 
+.flatpickr-day.selected:hover, 
+.flatpickr-day.startRange:hover, 
+.flatpickr-day.endRange:hover, 
+.flatpickr-day.prevMonthDay.selected, 
+.flatpickr-day.nextMonthDay.selected {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: white !important;
+}
+.flatpickr-months .flatpickr-month {
+  background: transparent !important;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+  font-weight: 500 !important;
+}
+.flatpickr-day:hover {
+  background: var(--primary-light) !important;
+  border-color: var(--primary-border) !important;
+}
+.flatpickr-current-month input.cur-year {
+  font-weight: 600 !important;
+}
+

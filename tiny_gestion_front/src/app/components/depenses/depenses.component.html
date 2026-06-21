@@ -1,0 +1,192 @@
+<div class="page-container">
+  <div class="header-section">
+    <div class="title-area">
+      <h2>Suivi des Dépenses</h2>
+      <p class="section-desc">Saisissez vos charges et factures de fonctionnement et d'entretien.</p>
+    </div>
+    <button (click)="toggleFormulaire()" class="btn-primary">
+      @if (afficherFormulaire) {
+        <span>Fermer</span>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="plus-icon"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+        <span>Ajouter</span>
+      }
+    </button>
+  </div>
+
+  @if (messageSucces) {
+    <div class="alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <span>{{ messageSucces }}</span>
+    </div>
+  }
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  <!-- Conteneur Layout Responsive -->
+  <div class="depenses-layout" [class.has-form]="afficherFormulaire">
+    
+    <!-- Formulaire d'Ajout (Masqué par défaut) -->
+    @if (afficherFormulaire) {
+      <div class="card-section form-card">
+        <h3>Saisir une Dépense</h3>
+        
+        <form (ngSubmit)="onSubmit()" #depenseForm="ngForm" class="fiche-form">
+          
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="dateDepense">Date de la dépense *</label>
+              <input type="text" mwlFlatpickr id="dateDepense" name="dateDepense" [(ngModel)]="nouvelleDepense.dateDepense" required>
+            </div>
+            <div class="form-group col-6">
+              <label for="fournisseur">Fournisseur *</label>
+              <input type="text" id="fournisseur" name="fournisseur" [(ngModel)]="nouvelleDepense.fournisseur" placeholder="Ex: EDF, Leroy Merlin" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="categorie">Catégorie de frais *</label>
+              <select id="categorie" name="categorie" [(ngModel)]="nouvelleDepense.categorie" required>
+                @for (cat of categories; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label for="moyenPaiement">Moyen de paiement</label>
+              <input type="text" id="moyenPaiement" name="moyenPaiement" [(ngModel)]="nouvelleDepense.moyenPaiement" placeholder="Ex: Carte bancaire, Virement">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="montantTtc">Montant TTC (€) *</label>
+              <input type="number" id="montantTtc" name="montantTtc" [(ngModel)]="nouvelleDepense.montantTtc" min="0" step="0.01" required>
+            </div>
+            <div class="form-group col-6">
+              <label for="tauxAffectationLocation">Affectation Tiny (%) *</label>
+              <input type="number" id="tauxAffectationLocation" name="tauxAffectationLocation" [(ngModel)]="nouvelleDepense.tauxAffectationLocation" min="0" max="100" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label for="statutDeductibilite">Déductibilité *</label>
+              <select id="statutDeductibilite" name="statutDeductibilite" [(ngModel)]="nouvelleDepense.statutDeductibilite" required>
+                @for (st of statutsDeductibilite; track st.value) {
+                  <option [value]="st.value">{{ st.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="commentaire">Commentaire / Justification</label>
+            <textarea id="commentaire" name="commentaire" [(ngModel)]="nouvelleDepense.commentaire" rows="2" placeholder="Explication de la quote-part ou de l'utilité du frais..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="doc">Facture / Justificatif lié</label>
+            <select id="doc" name="doc" [(ngModel)]="nouvelleDepense.documentJustificatif" style="height: 52px; width: 100%; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 1.05rem; padding: 0.85rem 1.1rem; background-color: white;">
+              <option [ngValue]="null">-- Aucun justificatif lié --</option>
+              @for (d of documents; track d.id) {
+                <option [ngValue]="d">{{ d.nomFichier }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Calcul du montant retenu (Widget interactif) -->
+          <div class="recap-widget">
+            <div class="recap-row">
+              <span>Montant total facture (TTC)</span>
+              <span>{{ nouvelleDepense.montantTtc || 0 | number:'1.2-2' }} €</span>
+            </div>
+            <div class="recap-row text-muted">
+              <span>Taux d'affectation à la location</span>
+              <span>{{ nouvelleDepense.tauxAffectationLocation || 100 }} %</span>
+            </div>
+            <div class="recap-divider"></div>
+            <div class="recap-row recap-total">
+              <span>Montant déductible retenu</span>
+              <span class="retenu-highlight">{{ montantRetenuCalcule | number:'1.2-2' }} €</span>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="depenseForm.invalid || sauvegardeEnCours" class="btn-primary w-100">
+            @if (sauvegardeEnCours) {
+              <span class="spinner"></span>
+              <span>Enregistrement...</span>
+            } @else {
+              <span>Enregistrer la dépense</span>
+            }
+          </button>
+
+        </form>
+      </div>
+    }
+
+    <!-- Liste des Dépenses -->
+    <div class="list-container">
+      @if (chargement) {
+        <div class="loading-container">
+          <span class="spinner"></span>
+          <p>Chargement des charges...</p>
+        </div>
+      } @else {
+        <div class="list-section">
+          @if (depenses.length === 0) {
+            <div class="empty-state">
+              <p>Aucune dépense enregistrée pour le moment.</p>
+            </div>
+          } @else {
+            @for (d of depenses; track d.id) {
+              <div class="depense-card">
+                <div class="depense-header">
+                  <span class="deductible-badge" [class]="d.statutDeductibilite">
+                    {{ d.statutDeductibilite === 'DEDUCTIBLE' ? 'Déductible' : d.statutDeductibilite === 'NON_DEDUCTIBLE' ? 'Non Déductible' : 'À vérifier' }}
+                  </span>
+                  <span class="depense-date">{{ d.dateDepense | date:'dd MMM yyyy' }}</span>
+                </div>
+                
+                <div class="depense-body">
+                  <div class="provider-info">
+                    <span class="provider-name">{{ d.fournisseur || 'Fournisseur inconnu' }}</span>
+                    <span class="depense-category">{{ d.categorie }}</span>
+                  </div>
+                  
+                  <div class="financial-details">
+                    <div class="ttc-amount">TTC : {{ d.montantTtc | number:'1.2-2' }} € ({{ d.tauxAffectationLocation }}%)</div>
+                    <div class="retained-amount">{{ d.montantRetenu | number:'1.2-2' }} € retenus</div>
+                  </div>
+                </div>
+
+                @if (d.commentaire) {
+                  <p class="depense-comment">" {{ d.commentaire }} "</p>
+                }
+
+                <div class="depense-footer" style="display: flex; gap: 1rem; align-items: center;">
+                  @if (d.documentJustificatif) {
+                    <button type="button" (click)="telechargerJustificatif(d.documentJustificatif)" class="btn-download-item" style="display: flex; align-items: center; gap: 0.5rem; background: #f0fdfa; border: 1px solid #ccfbf1; color: #0d9488; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; height: 42px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                      <span>Facture</span>
+                    </button>
+                  }
+                  <button (click)="supprimer(d.id)" class="btn-delete-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="delete-icon"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    <span>Supprimer</span>
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

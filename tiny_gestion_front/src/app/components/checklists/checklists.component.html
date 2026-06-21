@@ -1,0 +1,155 @@
+<div class="page-container">
+  <!-- Header -->
+  <header class="header-section">
+    <div class="header-title-area">
+      <h2>Obligations & Checklist Mensuelle</h2>
+      <p class="section-desc">
+        Suivez et validez vos obligations mensuelles de gestion pour votre Tiny House.
+      </p>
+    </div>
+    
+    @if (sauvegardeEnCours) {
+      <div class="save-status">
+        <div class="spinner-sm"></div>
+        <span>Sauvegarde en cours...</span>
+      </div>
+    }
+  </header>
+
+  <!-- Error display -->
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" x2="12" y1="8" y2="12" />
+        <line x1="12" x2="12.01" y1="16" y2="16" />
+      </svg>
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  @if (messageSucces) {
+    <div class="alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+      <span>{{ messageSucces }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (chargement) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Chargement de la checklist...</p>
+    </div>
+  } @else {
+    @if (!logementActif) {
+      <div class="no-logement-card">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="no-logement-icon">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <h3>Aucun logement configuré</h3>
+        <p>Veuillez d'abord configurer une Tiny House dans l'onglet Logement.</p>
+        <button [routerLink]="['/logement']" class="btn-primary">Créer ma Tiny House</button>
+      </div>
+    } @else {
+      <!-- Period Filter Area -->
+      <section class="filter-section">
+        <div class="filter-group">
+          <label>Logement Actif</label>
+          <div class="logement-info-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="badge-icon">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span>{{ logementActif.nom }}</span>
+          </div>
+        </div>
+
+        <div class="date-filters">
+          <div class="filter-group">
+            <label for="mois">Mois de l'obligation</label>
+            <select id="mois" [(ngModel)]="moisSelectionne" (change)="onPeriodeChange()" class="select-field">
+              @for (m of listeMois; track m.value) {
+                <option [value]="m.value">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="annee">Année</label>
+            <select id="annee" [(ngModel)]="anneeSelectionnee" (change)="onPeriodeChange()" class="select-field">
+              @for (a of listeAnnees; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Checklist card -->
+      <div class="checklist-card">
+        <div class="checklist-header">
+          <div class="checklist-title-meta">
+            <h3>Obligations de {{ getLabelMois(moisSelectionne) }} {{ anneeSelectionnee }}</h3>
+            <p class="checklist-subtitle">Cochez les tâches au fur et à mesure de votre gestion mensuelle.</p>
+          </div>
+          <div class="completion-badge" [class.complete]="tauxCompletionCalculer === 100">
+            {{ tauxCompletionCalculer }}% Complété
+          </div>
+        </div>
+
+        <!-- Progress Bar (Senior Friendly) -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" [style.width.%]="tauxCompletionCalculer" [class.complete]="tauxCompletionCalculer === 100"></div>
+          </div>
+        </div>
+
+        <!-- Task List (Senior-friendly targets, min 52px height) -->
+        <div class="tasks-list">
+          @if (taches.length === 0) {
+            <p class="empty-tasks">Aucune tâche disponible pour cette période.</p>
+          } @else {
+            @for (t of taches; track t.id) {
+              <div class="task-row" [class.completed]="t.termine" (click)="toggleTache(t)" role="button" tabindex="0" (keydown.enter)="toggleTache(t)">
+                <div class="checkbox-container">
+                  <div class="custom-checkbox" [class.checked]="t.termine">
+                    @if (t.termine) {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="check-icon">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    }
+                  </div>
+                </div>
+                <div class="task-label-area">
+                  <span class="task-label">{{ t.libelle }}</span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Info/Help Panel -->
+      <div class="help-panel">
+        <div class="help-icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="help-icon">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" x2="12.01" y1="17" y2="17" />
+          </svg>
+        </div>
+        <div class="help-content">
+          <h4>Pourquoi suivre cette checklist ?</h4>
+          <p>
+            La gestion d'une Tiny House sous le statut LMNP (Loueur en Meublé Non Professionnel) exige de la rigueur pour justifier de vos charges déductibles et de vos recettes brutes. 
+            Remplir cette checklist chaque mois vous évite les oublis de fin d'année et facilite grandement la préparation de votre bilan annuel fiscal.
+          </p>
+        </div>
+      </div>
+    }
+  }
+</div>

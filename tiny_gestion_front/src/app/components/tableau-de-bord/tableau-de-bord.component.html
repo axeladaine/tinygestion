@@ -1,0 +1,340 @@
+<div class="page-container">
+  <!-- Header -->
+  <header class="header-section">
+    <div class="user-welcome">
+      <h2>Tableau de Bord</h2>
+      <p class="section-desc">
+        Bonjour, <strong>{{ utilisateur()?.prenom || 'Propriétaire' }}</strong>. Suivez vos performances en un coup d'œil.
+      </p>
+    </div>
+    <button (click)="deconnexion()" class="btn-logout" title="Se déconnecter">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logout-icon">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" x2="9" y1="12" y2="12" />
+      </svg>
+      <span>Déconnexion</span>
+    </button>
+  </header>
+
+  <!-- Error display -->
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" x2="12" y1="8" y2="12" />
+        <line x1="12" x2="12.01" y1="16" y2="16" />
+      </svg>
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (chargement) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Chargement de vos données de gestion...</p>
+    </div>
+  } @else {
+    <!-- Case: No Lodging Configured -->
+    @if (!logementSelectionne) {
+      <div class="no-logement-card">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="no-logement-icon">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <h3>Aucun logement configuré</h3>
+        <p>Pour commencer à enregistrer vos recettes et dépenses, vous devez configurer les détails de votre premier logement.</p>
+        <button [routerLink]="['/logement']" class="btn-primary">
+          Créer ma fiche logement
+        </button>
+      </div>
+    } @else {
+      <!-- Period Selector / Filter Area -->
+      <section class="filter-section">
+        <div class="filter-group">
+          <label>Logement</label>
+          <div class="logement-info-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="badge-icon">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span>{{ logementSelectionne.nom }}</span>
+          </div>
+        </div>
+
+        <div class="date-filters">
+          <button (click)="moisPrecedent()" class="btn-date-nav" title="Mois précédent">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+
+          <div class="filter-group">
+            <label for="mois">Mois</label>
+            <select id="mois" [(ngModel)]="moisSelectionne" (change)="onPeriodeChange()">
+              @for (m of listeMois; track m.value) {
+                <option [value]="m.value">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="annee">Année</label>
+            <select id="annee" [(ngModel)]="anneeSelectionnee" (change)="onPeriodeChange()">
+              @for (a of listeAnnees; track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+          </div>
+
+          <button (click)="moisSuivant()" class="btn-date-nav" title="Mois suivant">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Parcours d'accompagnement (Onboarding) -->
+      @if (!onboardingTermine) {
+        <section class="onboarding-section" style="margin-bottom: 2rem;">
+          <div class="onboarding-card" style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+            <div class="onboarding-header" style="margin-bottom: 1.25rem;">
+              <h3 style="margin: 0 0 0.25rem 0; font-size: 1.25rem; font-weight: 800; color: #0d9488;">👋 Bienvenue dans votre Espace de Gestion</h3>
+              <p style="margin: 0; color: #475569; font-size: 0.95rem;">Voici le parcours recommandé pour démarrer le suivi de votre Tiny House :</p>
+            </div>
+            <div class="onboarding-steps" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <div class="step" [class.completed]="step1Complete" style="flex: 1; min-width: 200px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div class="step-check" style="width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; background: #cbd5e1; color: #475569;">
+                  @if (step1Complete) {
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px; color: white;"><polyline points="20 6 9 17 4 12"/></svg>
+                  } @else {
+                    <span>1</span>
+                  }
+                </div>
+                <div class="step-info">
+                  <span class="step-title" style="display: block; font-weight: 700; font-size: 0.95rem;">Logement</span>
+                  <p class="step-desc" style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #64748b; line-height: 1.4;">Créer votre fiche logement. <a [routerLink]="['/logement']" style="color: #0d9488; font-weight: 700; text-decoration: none;">Faire</a></p>
+                </div>
+              </div>
+
+              <div class="step" [class.completed]="step2Complete" style="flex: 1; min-width: 200px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div class="step-check" style="width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; background: #cbd5e1; color: #475569;">
+                  @if (step2Complete) {
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px; color: white;"><polyline points="20 6 9 17 4 12"/></svg>
+                  } @else {
+                    <span>2</span>
+                  }
+                </div>
+                <div class="step-info">
+                  <span class="step-title" style="display: block; font-weight: 700; font-size: 0.95rem;">Amortissement</span>
+                  <p class="step-desc" style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #64748b; line-height: 1.4;">Ajouter un investissement. <a [routerLink]="['/biens-amortissables']" style="color: #0d9488; font-weight: 700; text-decoration: none;">Faire</a></p>
+                </div>
+              </div>
+
+              <div class="step" [class.completed]="step3Complete" style="flex: 1; min-width: 200px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div class="step-check" style="width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; background: #cbd5e1; color: #475569;">
+                  @if (step3Complete) {
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px; color: white;"><polyline points="20 6 9 17 4 12"/></svg>
+                  } @else {
+                    <span>3</span>
+                  }
+                </div>
+                <div class="step-info">
+                  <span class="step-title" style="display: block; font-weight: 700; font-size: 0.95rem;">Recette</span>
+                  <p class="step-desc" style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #64748b; line-height: 1.4;">Saisir un encaissement. <a [routerLink]="['/recettes']" style="color: #0d9488; font-weight: 700; text-decoration: none;">Faire</a></p>
+                </div>
+              </div>
+
+              <div class="step" [class.completed]="step4Complete" style="flex: 1; min-width: 200px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; transition: all 0.2s ease;">
+                <div class="step-check" style="width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 700; background: #cbd5e1; color: #475569;">
+                  @if (step4Complete) {
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width: 14px; height: 14px; color: white;"><polyline points="20 6 9 17 4 12"/></svg>
+                  } @else {
+                    <span>4</span>
+                  }
+                </div>
+                <div class="step-info">
+                  <span class="step-title" style="display: block; font-weight: 700; font-size: 0.95rem;">Dépense</span>
+                  <p class="step-desc" style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #64748b; line-height: 1.4;">Ajouter une facture. <a [routerLink]="['/depenses']" style="color: #0d9488; font-weight: 700; text-decoration: none;">Faire</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- Styles d'onboarding à intégrer dynamiquement -->
+      <style>
+        .step.completed {
+          background-color: #f0fdf4 !important;
+          border-color: #bbf7d0 !important;
+        }
+        .step.completed .step-check {
+          background-color: #16a34a !important;
+        }
+        .step.completed .step-title {
+          color: #15803d !important;
+          text-decoration: line-through;
+        }
+      </style>
+
+      <!-- Stats Grid -->
+      <section class="stats-grid">
+        @if (chargementStats) {
+          <div class="grid-overlay">
+            <div class="spinner"></div>
+          </div>
+        }
+
+        <!-- Card: Recettes -->
+        <div class="stat-card recette-card">
+          <div class="card-header">
+            <span class="card-title">Recettes brutes</span>
+            <div class="icon-wrapper bg-green-dim">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="card-icon text-green">
+                <path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-value">{{ (stats?.totalRecettes || 0) | number:'1.2-2' }} €</div>
+          <div class="card-footer">
+            <span class="trend-indicator up">Encaissé ce mois-ci</span>
+          </div>
+        </div>
+
+        <!-- Card: Dépenses -->
+        <div class="stat-card depense-card">
+          <div class="card-header">
+            <span class="card-title">Dépenses retenues</span>
+            <div class="icon-wrapper bg-red-dim">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="card-icon text-red">
+                <rect width="18" height="12" x="3" y="6" rx="2"/>
+                <path d="M3 10h18"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-value">{{ (stats?.totalDepenses || 0) | number:'1.2-2' }} €</div>
+          <div class="card-footer">
+            <span class="trend-indicator down">Proratisé selon affectation</span>
+          </div>
+        </div>
+
+        <!-- Card: Résultat -->
+        <div class="stat-card resultat-card" [ngClass]="{'positive': (stats?.resultatEstime || 0) >= 0, 'negative': (stats?.resultatEstime || 0) < 0}">
+          <div class="card-header">
+            <span class="card-title">Résultat estimé</span>
+            <div class="icon-wrapper" [ngClass]="{'bg-teal-dim': (stats?.resultatEstime || 0) >= 0, 'bg-orange-dim': (stats?.resultatEstime || 0) < 0}">
+              @if ((stats?.resultatEstime || 0) >= 0) {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="card-icon text-teal">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="card-icon text-orange">
+                  <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+                  <polyline points="16 17 22 17 22 11" />
+                </svg>
+              }
+            </div>
+          </div>
+          <div class="card-value">{{ (stats?.resultatEstime || 0) | number:'1.2-2' }} €</div>
+          <div class="card-footer">
+            <span class="trend-indicator">Trésorerie estimée</span>
+          </div>
+        </div>
+
+        <!-- Card: Justificatifs -->
+        <div class="stat-card warning-card" [ngClass]="{'has-warnings': (stats?.justificatifsManquants || 0) > 0}">
+          <div class="card-header">
+            <span class="card-title">Pièces manquantes</span>
+            <div class="icon-wrapper" [ngClass]="{'bg-amber-dim': (stats?.justificatifsManquants || 0) > 0, 'bg-gray-dim': (stats?.justificatifsManquants || 0) === 0}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="card-icon" [ngClass]="{'text-amber': (stats?.justificatifsManquants || 0) > 0, 'text-gray': (stats?.justificatifsManquants || 0) === 0}">
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                <path d="M10 9H8" />
+                <path d="M16 13H8" />
+                <path d="M16 17H8" />
+              </svg>
+            </div>
+          </div>
+          <div class="card-value">{{ stats?.justificatifsManquants || 0 }}</div>
+          <div class="card-footer">
+            <span class="trend-indicator" [ngClass]="{'text-warn': (stats?.justificatifsManquants || 0) > 0}">
+              {{ (stats?.justificatifsManquants || 0) > 0 ? 'Justificatifs à téléverser' : 'Tous les justificatifs sont saisis' }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="actions-section">
+        <h3>Actions Rapides</h3>
+        <div class="actions-grid">
+          <button [routerLink]="['/recettes']" class="action-btn">
+            <div class="action-icon bg-green-dim">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green">
+                <path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/>
+              </svg>
+            </div>
+            <div class="action-label">
+              <span class="action-title">Saisir une Recette</span>
+              <span class="action-desc">Enregistrer une réservation</span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </button>
+
+          <button [routerLink]="['/depenses']" class="action-btn">
+            <div class="action-icon bg-red-dim">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red">
+                <rect width="18" height="12" x="3" y="6" rx="2"/>
+                <path d="M3 10h18"/>
+              </svg>
+            </div>
+            <div class="action-label">
+              <span class="action-title">Saisir une Dépense</span>
+              <span class="action-desc">Ajouter une facture ou charge</span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Justificatifs manquants -->
+      @if (recettesSansJustificatif.length > 0 || depensesSansJustificatif.length > 0) {
+        <section class="missing-justificatifs-section" style="margin-top: 2rem; background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+          <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 22px; height: 22px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span>Justificatifs manquants détectés</span>
+          </h3>
+          <p style="margin: 0 0 1.5rem 0; color: #475569; font-size: 0.95rem;">Pour assurer votre conformité en cas de contrôle, téléversez les factures ou reçus manquants pour les opérations suivantes :</p>
+          
+          <div class="missing-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            @for (r of recettesSansJustificatif; track r.id) {
+              <div class="missing-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border: 1px solid #fef3c7; background: #fffbeb; border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="background: #fef3c7; color: #b45309; font-weight: 700; font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;">Recette</span>
+                  <span style="font-weight: 600; font-size: 1rem; color: #0f172a;">Réservation {{ r.nomClient || 'Voyageur' }} ({{ r.dateEncaissement | date:'dd/MM/yyyy' }}) — <strong>{{ r.montantBrut }} €</strong></span>
+                </div>
+                <a [routerLink]="['/justificatifs']" style="display: flex; align-items: center; gap: 0.5rem; background: #d97706; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Téléverser</a>
+              </div>
+            }
+            @for (d of depensesSansJustificatif; track d.id) {
+              <div class="missing-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border: 1px solid #fecaca; background: #fef2f2; border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="background: #fee2e2; color: #b91c1c; font-weight: 700; font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 6px; text-transform: uppercase;">Dépense</span>
+                  <span style="font-weight: 600; font-size: 1rem; color: #0f172a;">Achat {{ d.fournisseur || 'Fournisseur' }} ({{ d.dateDepense | date:'dd/MM/yyyy' }}) — <strong>{{ d.montantTtc }} €</strong></span>
+                </div>
+                <a [routerLink]="['/justificatifs']" style="display: flex; align-items: center; gap: 0.5rem; background: #dc2626; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem;">Téléverser</a>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    }
+  }
+</div>

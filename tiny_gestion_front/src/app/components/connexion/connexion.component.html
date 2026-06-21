@@ -1,0 +1,78 @@
+<div class="connexion-page">
+  <div class="background-glow"></div>
+  
+  <div class="connexion-card">
+    <div class="logo-container">
+      <div class="logo-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="home-icon">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <h1>Tiny Gestion</h1>
+      <p class="subtitle">Connectez-vous pour accéder au suivi de la tiny house.</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="form-container">
+      @if (messageErreur) {
+        <div class="error-alert">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" x2="12" y1="8" y2="12"/>
+            <line x1="12" x2="12.01" y1="16" y2="16"/>
+          </svg>
+          <span>{{ messageErreur }}</span>
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="email">Adresse email</label>
+        <div class="input-wrapper">
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            [(ngModel)]="email" 
+            required 
+            #emailInput="ngModel"
+            placeholder="votre.email@exemple.com"
+            [class.invalid]="emailInput.invalid && emailInput.touched"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <div class="input-wrapper">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            [(ngModel)]="motDePasse" 
+            required 
+            #passwordInput="ngModel"
+            placeholder="••••••••"
+            [class.invalid]="passwordInput.invalid && passwordInput.touched"
+          />
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="loginForm.invalid || chargement" class="submit-btn">
+        @if (chargement) {
+          <span class="spinner"></span>
+          <span>Connexion en cours...</span>
+        } @else {
+          <span>Se connecter</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon">
+            <line x1="5" x2="19" y1="12" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        }
+      </button>
+
+      <div class="switch-link" style="text-align: center; font-size: 0.95rem; color: var(--text-muted); margin-top: 1rem;">
+        Pas encore de compte ? <a routerLink="/inscription" style="color: var(--accent-color); text-decoration: none; font-weight: 700;">Créez-en un</a>
+      </div>
+    </form>
+  </div>
+</div>

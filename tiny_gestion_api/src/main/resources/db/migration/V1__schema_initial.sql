@@ -1,0 +1,12 @@
+CREATE TABLE utilisateur (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    mot_de_passe_hash VARCHAR(255) NOT NULL,
+    prenom VARCHAR(255),
+    nom VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL, -- PROPRIETAIRE, ASSISTANT
+    actif BOOLEAN DEFAULT TRUE,
+    date_derniere_connexion TIMESTAMP,
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_modification TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

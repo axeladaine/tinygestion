@@ -1,0 +1,178 @@
+<div class="page-container">
+  <div class="header-section">
+    <h2>Fiche Logement</h2>
+    <p class="section-desc">Gérez les caractéristiques de votre Tiny House pour les calculs de taxes et d'amortissements.</p>
+  </div>
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  @if (chargement) {
+    <div class="loading-container">
+      <span class="spinner"></span>
+      <p>Chargement du logement...</p>
+    </div>
+  } @else if (logement) {
+    <form (ngSubmit)="onSubmit()" #logementForm="ngForm" class="fiche-form">
+      
+      @if (messageSucces) {
+        <div class="alert alert-success">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>{{ messageSucces }}</span>
+        </div>
+      }
+
+      <div class="form-column">
+        <!-- Informations Générales -->
+        <div class="card-section">
+          <h3>Informations Générales</h3>
+          
+          <div class="form-group">
+            <label for="nom">Nom du logement *</label>
+            <input 
+              type="text" 
+              id="nom" 
+              name="nom" 
+              [(ngModel)]="logement.nom" 
+              required 
+              placeholder="Ex: Ma Tiny House des Bois"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="adresse">Adresse</label>
+            <input 
+              type="text" 
+              id="adresse" 
+              name="adresse" 
+              [(ngModel)]="logement.adresse" 
+              placeholder="Ex: 12 chemin des Landes"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="codePostal">Code postal</label>
+              <input 
+                type="text" 
+                id="codePostal" 
+                name="codePostal" 
+                [(ngModel)]="logement.codePostal" 
+                placeholder="33000"
+              />
+            </div>
+            <div class="form-group col-8">
+              <label for="ville">Ville</label>
+              <input 
+                type="text" 
+                id="ville" 
+                name="ville" 
+                [(ngModel)]="logement.ville" 
+                placeholder="Bordeaux"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Statut Fiscal -->
+        <div class="card-section">
+          <h3>Qualification Fiscale</h3>
+          
+          <div class="form-group">
+            <label for="qualificationLogement">Régime fiscal du bien</label>
+            <select 
+              id="qualificationLogement" 
+              name="qualificationLogement" 
+              [(ngModel)]="logement.qualificationLogement"
+            >
+              @for (q of qualifications; track q.value) {
+                <option [value]="q.value">{{ q.label }}</option>
+              }
+            </select>
+            <p class="help-text">
+              D'après l'administration, une Tiny House sur terrain est souvent assimilée à une <strong>résidence secondaire</strong>.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="dateDebutLocation">Date de début de location</label>
+            <input 
+              type="text" 
+              mwlFlatpickr
+              id="dateDebutLocation" 
+              name="dateDebutLocation" 
+              [(ngModel)]="logement.dateDebutLocation" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-column">
+        <!-- Caractéristiques Techniques -->
+        <div class="card-section">
+          <h3>Caractéristiques & Raccordement</h3>
+          
+          <div class="switch-group">
+            <div class="switch-item">
+              <div class="switch-label-area">
+                <span class="switch-title">Bien déplaçable / mobile</span>
+                <span class="switch-desc">La tiny house conserve ses roues et peut être tractée.</span>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" name="estDeplacable" [(ngModel)]="logement.estDeplacable">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-label-area">
+                <span class="switch-title">Sur terrain de la résidence principale</span>
+                <span class="switch-desc">Permet de gérer l'électricité ou l'eau partagée.</span>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" name="estSurTerrainResidencePrincipale" [(ngModel)]="logement.estSurTerrainResidencePrincipale">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-label-area">
+                <span class="switch-title">Loué en courte durée</span>
+                <span class="switch-desc">Loué à la nuitée/semaine via des plateformes (Airbnb, Booking).</span>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" name="estLoueCourteDuree" [(ngModel)]="logement.estLoueCourteDuree">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-label-area">
+                <span class="switch-title">Classé Meublé de Tourisme</span>
+                <span class="switch-desc">A obtenu un classement officiel (étoiles) en préfecture/organisme.</span>
+              </div>
+              <label class="switch-control">
+                <input type="checkbox" name="estMeubleTourisme" [(ngModel)]="logement.estMeubleTourisme">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="logementForm.invalid || sauvegardeEnCours" class="btn-save w-100">
+          @if (sauvegardeEnCours) {
+            <span class="spinner"></span>
+            <span>Enregistrement...</span>
+          } @else {
+            <span>Enregistrer les modifications</span>
+          }
+        </button>
+      </div>
+
+    </form>
+  }
+</div>

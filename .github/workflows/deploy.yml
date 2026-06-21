@@ -1,0 +1,77 @@
+name: Tiny Gestion CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build & Push Backend Docker image
+        run: |
+          TAG=latest
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            TAG=develop
+          fi
+          # Convert repository name to lowercase for Docker image naming constraints
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPO_LOWER/tiny-gestion-backend:$TAG ./tiny_gestion_api
+          docker push ghcr.io/$REPO_LOWER/tiny-gestion-backend:$TAG
+
+      - name: Build & Push Frontend Docker image
+        run: |
+          TAG=latest
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            TAG=develop
+          fi
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPO_LOWER/tiny-gestion-front:$TAG ./tiny_gestion_front
+          docker push ghcr.io/$REPO_LOWER/tiny-gestion-front:$TAG
+
+      - name: Debug Output Files
+        run: |
+          TAG=latest
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            TAG=develop
+          fi
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "==== VÉRIFICATION DU CONTENU DU CONTENEUR FRONT =========="
+          docker run --rm ghcr.io/$REPO_LOWER/tiny-gestion-front:$TAG ls -la /usr/share/nginx/html
+          echo "=========================================================="
+
+      - name: Copy docker-compose.prod.yml via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/opt/tiny-gestion/prod/app"
+
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
+            
+            cd /opt/tiny-gestion/prod/app
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d

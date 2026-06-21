@@ -1,0 +1,186 @@
+<div class="page-container">
+  @if (!estProprietaire) {
+    <div class="unauthorized-card">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lock-icon">
+        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      <h2>Accès Réservé au Propriétaire</h2>
+      <p>Désolé, seul le propriétaire principal peut inviter des assistants ou consulter le journal de sécurité.</p>
+    </div>
+  } @else {
+    <!-- Titre principal -->
+    <div class="header-section">
+      <div>
+        <h1>Administration & Sécurité</h1>
+        <p class="subtitle">Gérez les accès de vos collaborateurs et inspectez les événements de sécurité.</p>
+      </div>
+    </div>
+
+    @if (messageSucces) {
+      <div class="alert alert-success">
+        <span>{{ messageSucces }}</span>
+      </div>
+    }
+
+    @if (messageErreur) {
+      <div class="alert alert-danger">
+        <span>{{ messageErreur }}</span>
+      </div>
+    }
+
+    <!-- Section Assistants (Co-gestionnaires) -->
+    <div class="admin-grid">
+      <!-- Formulaire d'invitation -->
+      <div class="admin-card form-card-box">
+        <h3>Inviter un assistant</h3>
+        <p class="section-desc">Les assistants peuvent saisir vos recettes et dépenses mais ne peuvent pas modifier les informations de sécurité ni supprimer le compte.</p>
+        
+        <form (ngSubmit)="onSubmitAssistant()" #assistantForm="ngForm" class="assistant-form">
+          <div class="form-group">
+            <label for="prenomAss">Prénom *</label>
+            <input 
+              type="text" 
+              id="prenomAss" 
+              name="prenomAss" 
+              [(ngModel)]="prenomAssistant" 
+              required
+              placeholder="Ex: Sophie"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="nomAss">Nom *</label>
+            <input 
+              type="text" 
+              id="nomAss" 
+              name="nomAss" 
+              [(ngModel)]="nomAssistant" 
+              required
+              placeholder="Ex: Bernard"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="emailAss">Adresse email *</label>
+            <input 
+              type="email" 
+              id="emailAss" 
+              name="emailAss" 
+              [(ngModel)]="emailAssistant" 
+              required
+              placeholder="assistant@exemple.com"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="mdpAss">Mot de passe temporaire *</label>
+            <input 
+              type="password" 
+              id="mdpAss" 
+              name="mdpAss" 
+              [(ngModel)]="motDePasseAssistant" 
+              required
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button type="submit" [disabled]="assistantForm.invalid || sauvegardeEnCours" class="btn btn-primary">
+            @if (sauvegardeEnCours) {
+              <span class="spinner"></span>
+              <span>Création...</span>
+            } @else {
+              <span>Créer l'assistant</span>
+            }
+          </button>
+        </form>
+      </div>
+
+      <!-- Liste des assistants -->
+      <div class="admin-card list-card-box">
+        <h3>Vos assistants actifs</h3>
+        
+        @if (chargementAssistants) {
+          <div class="loader-container">
+            <span class="page-spinner"></span>
+            <p>Chargement des assistants...</p>
+          </div>
+        } @else if (assistants.length === 0) {
+          <div class="empty-state-box">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon-sub">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <p>Aucun assistant configuré.</p>
+            <p class="sub-empty">Utilisez le formulaire pour partager l'accès à la gestion de la Tiny House.</p>
+          </div>
+        } @else {
+          <div class="assistants-list">
+            @for (ass of assistants; track ass.id) {
+              <div class="assistant-row">
+                <div class="assistant-info">
+                  <div class="assistant-avatar">
+                    {{ ass.prenom ? ass.prenom.charAt(0) : '' }}{{ ass.nom ? ass.nom.charAt(0) : '' }}
+                  </div>
+                  <div>
+                    <span class="assistant-name">{{ ass.prenom }} {{ ass.nom }}</span>
+                    <span class="assistant-email">{{ ass.email }}</span>
+                  </div>
+                </div>
+                <button (click)="supprimerAssistant(ass.id)" class="btn-revoke" title="Révoquer l'accès">
+                  Révoquer l'accès
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Journal de sécurité -->
+    <div class="admin-card logs-card-box">
+      <h3>Journal des événements de sécurité</h3>
+      <p class="section-desc">Historique complet des connexions, inscriptions, modifications de mots de passe ou ajouts de collaborateurs.</p>
+
+      @if (chargementLogs) {
+        <div class="loader-container">
+          <span class="page-spinner"></span>
+          <p>Chargement du journal...</p>
+        </div>
+      } @else if (logs.length === 0) {
+        <p class="empty-text">Aucun événement de sécurité enregistré pour le moment.</p>
+      } @else {
+        <div class="table-container">
+          <table class="logs-table">
+            <thead>
+              <tr>
+                <th>Date / Heure</th>
+                <th>Adresse IP</th>
+                <th>Utilisateur / Cible</th>
+                <th>Événement</th>
+                <th>Détails</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (log of logs; track log.id) {
+                <tr>
+                  <td class="date-cell">{{ log.dateEvenement | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                  <td class="ip-cell">{{ log.adresseIp || 'N/A' }}</td>
+                  <td class="email-cell">{{ log.email }}</td>
+                  <td>
+                    <span class="badge" [class.badge-success]="log.typeEvenement === 'CONNEXION_REUSSIE'" [class.badge-danger]="log.typeEvenement === 'CONNEXION_ECHOUEE'" [class.badge-warn]="log.typeEvenement === 'AJOUT_ASSISTANT' || log.typeEvenement === 'INSCRIPTION'">
+                      {{ log.typeEvenement }}
+                    </span>
+                  </td>
+                  <td class="details-cell">{{ log.details }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

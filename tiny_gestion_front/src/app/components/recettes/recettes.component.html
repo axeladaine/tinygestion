@@ -1,0 +1,202 @@
+<div class="page-container">
+  <div class="header-section">
+    <div class="title-area">
+      <h2>Suivi des Recettes</h2>
+      <p class="section-desc">Enregistrez vos réservations et suivez vos encaissements réels.</p>
+    </div>
+    <button (click)="toggleFormulaire()" class="btn-primary">
+      @if (afficherFormulaire) {
+        <span>Fermer</span>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="plus-icon"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+        <span>Ajouter</span>
+      }
+    </button>
+  </div>
+
+  @if (messageSucces) {
+    <div class="alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <span>{{ messageSucces }}</span>
+    </div>
+  }
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  <!-- Conteneur Layout Responsive -->
+  <div class="recettes-layout" [class.has-form]="afficherFormulaire">
+    
+    <!-- Formulaire d'Ajout (Masqué par défaut) -->
+    @if (afficherFormulaire) {
+      <div class="card-section form-card">
+        <h3>Saisir une Réservation</h3>
+        
+        <form (ngSubmit)="onSubmit()" #recetteForm="ngForm" class="fiche-form">
+          
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="plateforme">Plateforme *</label>
+              <select id="plateforme" name="plateforme" [(ngModel)]="nouvelleRecette.plateforme" required>
+                @for (p of plateformes; track p.value) {
+                  <option [value]="p.value">{{ p.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label for="nomClient">Nom du client</label>
+              <input type="text" id="nomClient" name="nomClient" [(ngModel)]="nouvelleRecette.nomClient" placeholder="Ex: M. Martin">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="dateDebutSejour">Début séjour</label>
+              <input type="text" mwlFlatpickr id="dateDebutSejour" name="dateDebutSejour" [(ngModel)]="nouvelleRecette.dateDebutSejour" (ngModelChange)="calculerNuits()">
+            </div>
+            <div class="form-group col-6">
+              <label for="dateFinSejour">Fin séjour</label>
+              <input type="text" mwlFlatpickr id="dateFinSejour" name="dateFinSejour" [(ngModel)]="nouvelleRecette.dateFinSejour" (ngModelChange)="calculerNuits()">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="nombreNuits">Nuits</label>
+              <input type="number" id="nombreNuits" name="nombreNuits" [(ngModel)]="nouvelleRecette.nombreNuits" min="1">
+            </div>
+            <div class="form-group col-8">
+              <label for="dateEncaissement">Date d'encaissement *</label>
+              <input type="text" mwlFlatpickr id="dateEncaissement" name="dateEncaissement" [(ngModel)]="nouvelleRecette.dateEncaissement" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label for="montantBrut">Montant Brut *</label>
+              <input type="number" id="montantBrut" name="montantBrut" [(ngModel)]="nouvelleRecette.montantBrut" min="0" step="0.01" required>
+            </div>
+            <div class="form-group col-4">
+              <label for="fraisPlateforme">Frais Plateforme</label>
+              <input type="number" id="fraisPlateforme" name="fraisPlateforme" [(ngModel)]="nouvelleRecette.fraisPlateforme" min="0" step="0.01">
+            </div>
+            <div class="form-group col-4">
+              <label for="montantTaxeSejour">Taxe de Séjour</label>
+              <input type="number" id="montantTaxeSejour" name="montantTaxeSejour" [(ngModel)]="nouvelleRecette.montantTaxeSejour" min="0" step="0.01">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="commentaire">Commentaire / Notes</label>
+            <textarea id="commentaire" name="commentaire" [(ngModel)]="nouvelleRecette.commentaire" rows="2" placeholder="Informations complémentaires..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="doc">Relevé de plateforme / Justificatif lié</label>
+            <select id="doc" name="doc" [(ngModel)]="nouvelleRecette.documentJustificatif" style="height: 52px; width: 100%; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 1.05rem; padding: 0.85rem 1.1rem; background-color: white;">
+              <option [ngValue]="null">-- Aucun justificatif lié --</option>
+              @for (d of documents; track d.id) {
+                <option [ngValue]="d">{{ d.nomFichier }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Récapitulatif du calcul (Widget interactif) -->
+          <div class="recap-widget">
+            <div class="recap-row">
+              <span>Montant Brut</span>
+              <span>+ {{ nouvelleRecette.montantBrut || 0 | number:'1.2-2' }} €</span>
+            </div>
+            <div class="recap-row text-muted">
+              <span>Frais plateforme</span>
+              <span>- {{ nouvelleRecette.fraisPlateforme || 0 | number:'1.2-2' }} €</span>
+            </div>
+            <div class="recap-row text-muted">
+              <span>Taxe de séjour</span>
+              <span>- {{ nouvelleRecette.montantTaxeSejour || 0 | number:'1.2-2' }} €</span>
+            </div>
+            <div class="recap-divider"></div>
+            <div class="recap-row recap-total">
+              <span>Net à recevoir (estimé)</span>
+              <span class="net-highlight">{{ montantNetCalcule | number:'1.2-2' }} €</span>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="recetteForm.invalid || sauvegardeEnCours" class="btn-primary w-100">
+            @if (sauvegardeEnCours) {
+              <span class="spinner"></span>
+              <span>Enregistrement...</span>
+            } @else {
+              <span>Enregistrer la recette</span>
+            }
+          </button>
+
+        </form>
+      </div>
+    }
+
+    <!-- Liste des Recettes -->
+    <div class="list-container">
+      @if (chargement) {
+        <div class="loading-container">
+          <span class="spinner"></span>
+          <p>Chargement des réservations...</p>
+        </div>
+      } @else {
+        <div class="list-section">
+          @if (recettes.length === 0) {
+            <div class="empty-state">
+              <p>Aucune recette enregistrée pour le moment.</p>
+            </div>
+          } @else {
+            @for (r of recettes; track r.id) {
+              <div class="recette-card">
+                <div class="recette-header">
+                  <span class="platform-badge" [class]="r.plateforme">
+                    {{ r.plateforme === 'DIRECT' ? 'Direct' : r.plateforme }}
+                  </span>
+                  <span class="recette-date">{{ r.dateEncaissement | date:'dd MMM yyyy' }}</span>
+                </div>
+                
+                <div class="recette-body">
+                  <div class="client-info">
+                    <span class="client-name">{{ r.nomClient || 'Sans nom' }}</span>
+                    @if (r.dateDebutSejour) {
+                      <span class="stay-dates">Du {{ r.dateDebutSejour | date:'dd/MM' }} au {{ r.dateFinSejour | date:'dd/MM' }} ({{ r.nombreNuits }} nuits)</span>
+                    }
+                  </div>
+                  
+                  <div class="financial-details">
+                    <div class="gross-amount">{{ r.montantBrut | number:'1.2-2' }} € brut</div>
+                    <div class="net-amount">{{ r.montantNetRecu | number:'1.2-2' }} € net</div>
+                  </div>
+                </div>
+
+                @if (r.commentaire) {
+                  <p class="recette-comment">" {{ r.commentaire }} "</p>
+                }
+
+                <div class="recette-footer" style="display: flex; gap: 1rem; align-items: center;">
+                  @if (r.documentJustificatif) {
+                    <button type="button" (click)="telechargerJustificatif(r.documentJustificatif)" class="btn-download-item" style="display: flex; align-items: center; gap: 0.5rem; background: #f0fdfa; border: 1px solid #ccfbf1; color: #0d9488; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; height: 42px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                      <span>Justificatif</span>
+                    </button>
+                  }
+                  <button (click)="supprimer(r.id)" class="btn-delete-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="delete-icon"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    <span>Supprimer</span>
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

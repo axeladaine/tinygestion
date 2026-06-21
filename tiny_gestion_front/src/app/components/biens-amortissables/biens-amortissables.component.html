@@ -1,0 +1,299 @@
+<div class="page-container">
+  <!-- Titre et Actions -->
+  <div class="header-section">
+    <div>
+      <h1>Biens Amortissables et Investissements</h1>
+      <p class="subtitle">Suivez vos achats durables et planifiez les amortissements estimatifs de votre Tiny House.</p>
+    </div>
+    <button (click)="toggleFormulaire()" class="btn btn-primary btn-add-header">
+      @if (afficherFormulaire) {
+        <span>Fermer le formulaire</span>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+          <line x1="12" x2="12" y1="5" y2="19"/>
+          <line x1="5" x2="19" y1="12" y2="12"/>
+        </svg>
+        <span>Ajouter un investissement</span>
+      }
+    </button>
+  </div>
+
+  <!-- Avertissement fiscal obligatoire -->
+  <div class="warning-alert-card">
+    <div class="warning-icon-box">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="warning-icon">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+        <line x1="12" x2="12" y1="9" y2="13"/>
+        <line x1="12" x2="12.01" y1="17" y2="17"/>
+      </svg>
+    </div>
+    <div class="warning-text">
+      <strong>Attention :</strong> Les calculs fournis sont des estimations destinées au suivi personnel. Ils ne remplacent pas une déclaration fiscale officielle ni l'avis d'un professionnel.
+    </div>
+  </div>
+
+  @if (messageSucces) {
+    <div class="alert alert-success">
+      <span>{{ messageSucces }}</span>
+    </div>
+  }
+
+  @if (messageErreur) {
+    <div class="alert alert-danger">
+      <span>{{ messageErreur }}</span>
+    </div>
+  }
+
+  <!-- Cartes d'indicateurs globaux -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-title">Amortissements annuels totaux</span>
+      <span class="stat-value">{{ totalAmortissementsAnnuels | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
+      <span class="stat-label">Déduction estimée par an</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-title">Amortissements mensuels totaux</span>
+      <span class="stat-value">{{ totalAmortissementsMensuels | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
+      <span class="stat-label">Impact mensuel estimé</span>
+    </div>
+  </div>
+
+  <!-- Formulaire d'ajout -->
+  @if (afficherFormulaire) {
+    <div class="form-card">
+      <h3>Enregistrer un bien amortissable</h3>
+      <form (ngSubmit)="onSubmit()" #bienForm="ngForm" class="bien-form">
+        
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="nom">Nom de l'équipement / bien *</label>
+            <input 
+              type="text" 
+              id="nom" 
+              name="nom" 
+              [(ngModel)]="nouveauBien.nom" 
+              required
+              placeholder="Ex: Tiny House structure principale, Climatiseur..."
+            />
+          </div>
+          <div class="form-group col-6">
+            <label for="categorie">Catégorie de bien *</label>
+            <select 
+              id="categorie" 
+              name="categorie" 
+              [(ngModel)]="nouveauBien.categorie" 
+              required
+            >
+              @for (cat of categories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="dateAchat">Date d'achat *</label>
+            <input 
+              type="text" 
+              mwlFlatpickr
+              id="dateAchat" 
+              name="dateAchat" 
+              [(ngModel)]="nouveauBien.dateAchat" 
+              required
+            />
+          </div>
+          <div class="form-group col-6">
+            <label for="dateService">Date de mise en service</label>
+            <input 
+              type="text" 
+              mwlFlatpickr
+              id="dateService" 
+              name="dateService" 
+              [(ngModel)]="nouveauBien.dateMiseEnService"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-4">
+            <label for="montantTtc">Montant d'achat TTC (€) *</label>
+            <input 
+              type="number" 
+              id="montantTtc" 
+              name="montantTtc" 
+              [(ngModel)]="nouveauBien.montantTtc" 
+              required
+              min="0"
+            />
+          </div>
+          <div class="form-group col-4">
+            <label for="affectation">Affectation à la location (%) *</label>
+            <input 
+              type="number" 
+              id="affectation" 
+              name="affectation" 
+              [(ngModel)]="nouveauBien.tauxAffectationLocation" 
+              required
+              min="1" 
+              max="100"
+            />
+          </div>
+          <div class="form-group col-4">
+            <label for="duree">Durée d'amortissement (ans) *</label>
+            <input 
+              type="number" 
+              id="duree" 
+              name="duree" 
+              [(ngModel)]="nouveauBien.dureeAmortissementAns" 
+              required
+              min="1" 
+              max="50"
+            />
+          </div>
+        </div>
+
+        <!-- Section de calcul en temps réel pour l'accompagnement -->
+        <div class="live-calculation-card">
+          <h4>Calculs estimatifs en temps réel</h4>
+          <div class="calc-grid">
+            <div class="calc-item">
+              <span class="calc-label">Base amortissable :</span>
+              <span class="calc-value">{{ baseAmortissableCalculee | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
+            </div>
+            <div class="calc-item">
+              <span class="calc-label">Amortissement annuel :</span>
+              <span class="calc-value">{{ amortissementAnnuelCalcule | currency:'EUR':'symbol':'1.2-2':'fr' }} / an</span>
+            </div>
+            <div class="calc-item">
+              <span class="calc-label">Amortissement mensuel :</span>
+              <span class="calc-value">{{ amortissementMensuelCalcule | currency:'EUR':'symbol':'1.2-2':'fr' }} / mois</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="doc">Facture liée (facultatif)</label>
+            <select 
+              id="doc" 
+              name="doc" 
+              [(ngModel)]="nouveauBien.documentJustificatif" 
+              class="doc-select"
+            >
+              <option [ngValue]="null">-- Aucun justificatif lié --</option>
+              @for (d of documents; track d.id) {
+                <option [ngValue]="d">{{ d.nomFichier }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group col-6 checkbox-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                name="possedeFacture" 
+                [(ngModel)]="nouveauBien.possedeFacture"
+              />
+              <span>Je possède la facture d'achat physique</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="commentaire">Commentaire</label>
+          <textarea 
+            id="commentaire" 
+            name="commentaire" 
+            [(ngModel)]="nouveauBien.commentaire" 
+            placeholder="Détails supplémentaires..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" (click)="toggleFormulaire()" class="btn btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="bienForm.invalid || sauvegardeEnCours" class="btn btn-primary">
+            @if (sauvegardeEnCours) {
+              <span class="spinner"></span>
+              <span>Enregistrement...</span>
+            } @else {
+              <span>Enregistrer le bien</span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Tableau des investissements -->
+  <div class="biens-list-card">
+    <h3>Détail de vos investissements</h3>
+
+    @if (chargement) {
+      <div class="loader-container">
+        <span class="page-spinner"></span>
+        <p>Chargement des investissements...</p>
+      </div>
+    } @else if (biens.length === 0) {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-icon">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        <p>Aucun bien amortissable enregistré.</p>
+        <p class="sub-empty">Enregistrez vos achats durables (Tiny House, terrasse, électroménager) pour calculer vos amortissements.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="biens-table">
+          <thead>
+            <tr>
+              <th>Bien / Catégorie</th>
+              <th>Date d'achat</th>
+              <th>Montant Achat</th>
+              <th>Affectation</th>
+              <th>Base Amortissable</th>
+              <th>Durée</th>
+              <th>Amort. Annuel</th>
+              <th>Amort. Mensuel</th>
+              <th>Facture</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of biens; track b.id) {
+              <tr>
+                <td>
+                  <div class="bien-name">{{ b.nom }}</div>
+                  <div class="bien-category">{{ getLabelCategorie(b.categorie) }}</div>
+                </td>
+                <td class="date-cell">{{ b.dateAchat | date:'dd/MM/yyyy' }}</td>
+                <td class="amount-cell">{{ b.montantTtc | currency:'EUR':'symbol':'1.2-2':'fr' }}</td>
+                <td class="pct-cell">{{ b.tauxAffectationLocation }}%</td>
+                <td class="amount-cell font-semibold">{{ b.baseAmortissable | currency:'EUR':'symbol':'1.2-2':'fr' }}</td>
+                <td class="center-cell">{{ b.dureeAmortissementAns }} ans</td>
+                <td class="amount-cell text-teal font-semibold">{{ b.amortissementAnnuel | currency:'EUR':'symbol':'1.2-2':'fr' }}</td>
+                <td class="amount-cell text-teal">{{ b.amortissementMensuel | currency:'EUR':'symbol':'1.2-2':'fr' }}</td>
+                <td class="center-cell">
+                  @if (b.documentJustificatif || b.possedeFacture) {
+                    <span class="badge badge-success" title="Facture enregistrée">Oui</span>
+                  } @else {
+                    <span class="badge badge-danger" title="Aucune facture enregistrée">Non</span>
+                  }
+                </td>
+                <td class="actions-cell">
+                  <button (click)="supprimer(b.id)" class="btn-delete-action" title="Supprimer">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-icon">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

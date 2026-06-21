@@ -1,0 +1,23 @@
+# Maven
+tiny_gestion_api/target/
+!.mvn/wrapper/maven-wrapper.jar
+tiny_gestion_api/static
+tiny_gestion_api/templates
+*.class
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+dependency-reduced-pom.xml
+
+# Node / Angular
+tiny_gestion_front/node_modules/
+tiny_gestion_front/dist/
+tiny_gestion_front/.angular/
+tiny_gestion_front/.vscode/
+*.log
+
+# Secrets
+.env
+.env-prod
