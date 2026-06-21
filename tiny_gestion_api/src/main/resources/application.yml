@@ -38,3 +38,5 @@ application:
       # Clé secrète de signature JWT par défaut (à écraser en production via variable d'environnement)
       secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
       expiration: 86400000 # 1 jour en millisecondes
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200}
