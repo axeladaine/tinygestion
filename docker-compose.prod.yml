@@ -15,10 +15,6 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       JAVA_OPTS: "-Xms256m -Xmx512m"
-      DB_URL: "jdbc:postgresql://db:5432/${POSTGRES_DB:-tiny_gestion}"
-      DB_USER: "${POSTGRES_USER:-tiny_gestion_user}"
-      DB_PASSWORD: "${POSTGRES_PASSWORD}"
-      JWT_SECRET_KEY: "${JWT_SECRET_KEY}"
     volumes:
       - tiny_gestion_prod_uploads:/app/uploads
     networks:
