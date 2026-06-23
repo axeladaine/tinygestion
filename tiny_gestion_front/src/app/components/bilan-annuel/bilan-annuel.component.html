@@ -187,80 +187,96 @@
         </div>
       </div>
 
-      <!-- Aide Fiscale & Déclaration de revenus -->
+      <!-- Aide Fiscale & Déclaration de revenus (Régime optimisé recommandé uniquement) -->
       <section class="tax-declaration-section" style="margin-top: 2.5rem; margin-bottom: 2.5rem;">
         <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 22px; height: 22px; color: var(--primary);"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          <span>Aide à la déclaration d'impôts sur le revenu (2042-C-PRO)</span>
+          <span>À déclarer aux impôts (Régime optimisé recommandé)</span>
         </h3>
 
-        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-          <!-- Aide Micro-BIC -->
-          <div class="tax-help-card" [class.highlighted]="bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX'">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                <h4 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">Déclaration au Micro-BIC</h4>
-                @if (bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX') {
-                  <span style="font-size: 0.75rem; font-weight: 700; background: var(--green-dim); color: var(--green); padding: 0.25rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Conseillé</span>
-                }
-              </div>
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 1.25rem;">
-                Reportez le total de vos recettes brutes annuelles (loyers encaissés hors taxes de séjour). <strong>L'administration calculera elle-même l'abattement forfaitaire.</strong> Ne le déduisez pas vous-même.
-              </p>
+        <!-- Cas où le Micro-BIC ou équivalent est conseillé -->
+        @if (bilan.regimeFiscalConseille === 'MICRO_BIC_AVANTAGEUX' || bilan.regimeFiscalConseille === 'EQUIVALENT') {
+          <div class="tax-help-card highlighted" style="background: white; border: 2px solid var(--green) !important; border-radius: var(--radius-md); padding: 1.75rem; box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.08), 0 4px 6px -2px rgba(22, 163, 74, 0.04) !important;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--green);">Votre régime optimisé : Micro-BIC</h4>
+              <span style="font-size: 0.8rem; font-weight: 700; background: var(--green-dim); color: var(--green); padding: 0.3rem 0.6rem; border-radius: 6px; text-transform: uppercase;">
+                {{ bilan.regimeFiscalConseille === 'EQUIVALENT' ? 'Équivalent (Plus simple)' : 'Le plus avantageux' }}
+              </span>
             </div>
             
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-top: auto;">
-              <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Montant brut à saisir</div>
-              <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem;">{{ bilan.recettesBrutes | number:'1.2-2' }} €</div>
-              
-              <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid #e2e8f0;">
-                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Case à remplir</span>
-                <span class="fiscal-box-badge fiscal-green">
-                  {{ bilan.estMeubleTourisme ? '5NG' : '5ND' }}
-                </span>
+            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem;">
+              Pour déclarer vos revenus sous le régime **Micro-BIC**, reportez simplement le montant total brut de vos loyers encaissés. 
+              <strong>L'administration fiscale appliquera automatiquement l'abattement</strong> de {{ bilan.estMeubleTourisme ? '71%' : '50%' }} représentatif de vos frais. Ne déduisez rien vous-même.
+            </p>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                  <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; letter-spacing: 0.05em;">Montant brut à déclarer</div>
+                  <div style="font-size: 1.5rem; font-weight: 900; color: var(--text-primary);">{{ bilan.recettesBrutes | number:'1.2-2' }} €</div>
+                </div>
+                
+                <div style="text-align: right;">
+                  <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; letter-spacing: 0.05em;">Case de la déclaration 2042-C-PRO</div>
+                  <span class="fiscal-box-badge fiscal-green" style="font-size: 1.1rem; font-weight: 900; background: var(--green) !important; padding: 0.5rem 1rem; border-radius: 8px; color: white;">
+                    {{ bilan.estMeubleTourisme ? '5NG' : '5ND' }}
+                  </span>
+                </div>
               </div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-style: italic; line-height: 1.3;">
-                {{ bilan.estMeubleTourisme ? 'Meublé de tourisme classé (71% d\'abattement)' : 'Meublé classique (50% d\'abattement)' }}
+
+              <div style="padding-top: 0.75rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin-top: 1rem;">
+                <strong>Classification :</strong> {{ bilan.estMeubleTourisme ? 'Meublé de tourisme classé (71% d\'abattement)' : 'Location meublée classique (50% d\'abattement)' }}.
               </div>
             </div>
           </div>
+        }
 
-          <!-- Aide Réel Simplifié -->
-          <div class="tax-help-card" [class.highlighted]="bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX'">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                <h4 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">Déclaration au Réel</h4>
-                @if (bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX') {
-                  <span style="font-size: 0.75rem; font-weight: 700; background: var(--primary-light); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; text-transform: uppercase;">Conseillé</span>
+        <!-- Cas où le Réel Simplifié est conseillé -->
+        @if (bilan.regimeFiscalConseille === 'REGIME_REEL_AVANTAGEUX') {
+          <div class="tax-help-card highlighted" style="background: white; border: 2px solid var(--primary) !important; border-radius: var(--radius-md); padding: 1.75rem; box-shadow: 0 10px 15px -3px rgba(13, 148, 136, 0.08), 0 4px 6px -2px rgba(13, 148, 136, 0.04) !important;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--primary);">Votre régime optimisé : Réel Simplifié</h4>
+              <span style="font-size: 0.8rem; font-weight: 700; background: var(--primary-light); color: var(--primary); padding: 0.3rem 0.6rem; border-radius: 6px; text-transform: uppercase;">
+                Le plus avantageux
+              </span>
+            </div>
+            
+            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem;">
+              Le régime **Réel Simplifié** vous permet d'effacer tout ou partie de votre impôt grâce à la déduction des charges réelles et des amortissements. 
+              Vous devez préalablement envoyer une liasse fiscale (formulaires 2031 & 2033) via votre espace professionnel impots.gouv.fr, puis reporter le résultat sur votre déclaration personnelle.
+            </p>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                @if (bilan.resultatReelImposable > 0) {
+                  <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; letter-spacing: 0.05em;">Bénéfice imposable à déclarer</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #b45309;">{{ bilan.resultatReelImposable | number:'1.2-2' }} €</div>
+                  </div>
+                  
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; letter-spacing: 0.05em;">Case de la déclaration 2042-C-PRO</div>
+                    <span class="fiscal-box-badge fiscal-red" style="font-size: 1.1rem; font-weight: 900; background: var(--red) !important; padding: 0.5rem 1rem; border-radius: 8px; color: white;">5NA</span>
+                  </div>
+                } @else {
+                  <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; letter-spacing: 0.05em;">Déficit de l'année à déclarer</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: #0284c7;">{{ -bilan.resultatReelImposable | number:'1.2-2' }} €</div>
+                  </div>
+                  
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; letter-spacing: 0.05em;">Case de la déclaration 2042-C-PRO</div>
+                    <span class="fiscal-box-badge fiscal-blue" style="font-size: 1.1rem; font-weight: 900; background: #0284c7 !important; padding: 0.5rem 1rem; border-radius: 8px; color: white;">5NY</span>
+                  </div>
                 }
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.45; margin-bottom: 1.25rem;">
-                Déclarez le résultat net comptable. Vous devez au préalable déposer une liasse fiscale (formulaires 2031 & 2033) en ligne via la plateforme impots.gouv.fr professionnelle.
-              </p>
-            </div>
 
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-top: auto;">
-              @if (bilan.resultatReelImposable > 0) {
-                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Bénéfice à saisir</div>
-                <div style="font-size: 1.25rem; font-weight: 800; color: #b45309; margin-bottom: 0.75rem;">{{ bilan.resultatReelImposable | number:'1.2-2' }} €</div>
-                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid #e2e8f0;">
-                  <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Case à remplir (Bénéfice)</span>
-                  <span class="fiscal-box-badge fiscal-red">5NA</span>
-                </div>
-              } @else {
-                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">Déficit de l'année</div>
-                <div style="font-size: 1.25rem; font-weight: 800; color: #0284c7; margin-bottom: 0.75rem;">{{ -bilan.resultatReelImposable | number:'1.2-2' }} €</div>
-                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid #e2e8f0;">
-                  <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Case à remplir (Déficit)</span>
-                  <span class="fiscal-box-badge fiscal-blue">5NY</span>
-                </div>
-              }
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; font-style: italic; line-height: 1.3;">
-                {{ bilan.resultatReelImposable > 0 ? 'Bénéfice imposable de l\'exercice' : 'Déficit reportable sur les futurs bénéfices LMNP' }}
+              <div style="padding-top: 0.75rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin-top: 1rem;">
+                <strong>Instruction :</strong> {{ bilan.resultatReelImposable > 0 ? 'Reportez ce bénéfice net. Il s\'ajoutera à vos autres revenus pour le calcul de l\'impôt.' : 'Reportez ce déficit. Il est reportable sur vos bénéfices LMNP des 10 prochaines années.' }}
               </div>
             </div>
           </div>
-        </div>
+        }
       </section>
 
       <!-- Section CFE (Cotisation Foncière des Entreprises) -->
