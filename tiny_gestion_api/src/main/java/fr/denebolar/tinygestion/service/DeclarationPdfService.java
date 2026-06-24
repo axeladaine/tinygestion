@@ -107,21 +107,26 @@ public class DeclarationPdfService {
                 over.beginText();
                 over.setFontAndSize(bf, 8);
 
-                // Exercice fiscal (Y = 725)
-                ecrireTexteAligne(over, "01/01/" + annee, 110, 725, PdfContentByte.ALIGN_LEFT);
-                ecrireTexteAligne(over, "31/12/" + annee, 245, 725, PdfContentByte.ALIGN_LEFT);
+                // Exercice fiscal (Y = 735)
+                ecrireTexteAligne(over, "01/01/" + annee, 110, 735, PdfContentByte.ALIGN_LEFT);
+                ecrireTexteAligne(over, "31/12/" + annee, 245, 735, PdfContentByte.ALIGN_LEFT);
 
                 // Régime simplifié d'imposition (Coche à X = 513, Y = 735)
                 ecrireTexteAligne(over, "X", 513, 735, PdfContentByte.ALIGN_LEFT);
 
-                // Identification (Cadre A, Y = 673, 650)
+                // Identification (Cadre A, Y = 688, 665, 642)
                 String nomProprio = user.getPrenom() + " " + user.getNom();
-                ecrireTexteAligne(over, nomProprio, 75, 673, PdfContentByte.ALIGN_LEFT);
+                ecrireTexteAligne(over, nomProprio, 75, 688, PdfContentByte.ALIGN_LEFT);
                 
                 String nomLogement = logement.getNom() != null ? logement.getNom() : "";
-                ecrireTexteAligne(over, "MyTiny - Tiny House " + nomLogement, 75, 650, PdfContentByte.ALIGN_LEFT);
+                ecrireTexteAligne(over, "MyTiny - Tiny House " + nomLogement, 75, 665, PdfContentByte.ALIGN_LEFT);
 
-                // Résultat fiscal (Bénéfice Col 1 à X=505, Déficit Col 2 à X=585, Y=562)
+                String adr = (logement.getAdresse() != null ? logement.getAdresse() : "") + " " +
+                             (logement.getCodePostal() != null ? logement.getCodePostal() : "") + " " +
+                             (logement.getVille() != null ? logement.getVille() : "");
+                ecrireTexteAligne(over, adr, 75, 642, PdfContentByte.ALIGN_LEFT);
+
+                // Résultat fiscal (Bénéfice Col 1 à X=492, Déficit Col 2 à X=566, Y=570)
                 BigDecimal beneficeReel = bilan.resultatReelImposable();
                 BigDecimal deficitReel = BigDecimal.ZERO;
                 if (bilan.resultatAvantAmortissement().subtract(bilan.amortissementUtilise()).compareTo(BigDecimal.ZERO) < 0) {
@@ -129,16 +134,16 @@ public class DeclarationPdfService {
                 }
 
                 if (beneficeReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(over, formatNombre(beneficeReel), 505, 562, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(over, formatNombre(beneficeReel), 492, 570, PdfContentByte.ALIGN_RIGHT);
                 } else if (deficitReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(over, formatNombre(deficitReel), 585, 562, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(over, formatNombre(deficitReel), 566, 570, PdfContentByte.ALIGN_RIGHT);
                 }
 
-                // Cadre 7 : dont BIC non professionnels (Bénéfice à X=505, Déficit à X=585, Y=243)
+                // Cadre 7 : dont BIC non professionnels (Bénéfice à X=492, Déficit à X=566, Y=238)
                 if (beneficeReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(over, formatNombre(beneficeReel), 505, 243, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(over, formatNombre(beneficeReel), 492, 238, PdfContentByte.ALIGN_RIGHT);
                 } else if (deficitReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(over, formatNombre(deficitReel), 585, 243, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(over, formatNombre(deficitReel), 566, 238, PdfContentByte.ALIGN_RIGHT);
                 }
 
                 over.endText();
@@ -149,14 +154,14 @@ public class DeclarationPdfService {
                 overPage2.setFontAndSize(bf, 8);
 
                 // Report bénéfice/déficit dans cases correspondantes LMNP (Autres locations meublées non prof)
-                // Ligne "Autres locations meublées non professionnelles" -> Y = 86
-                // Ligne "Résultat avant imputation..." -> Y = 23
+                // Ligne "Autres locations meublées non professionnelles" -> Y = 88
+                // Ligne "Résultat avant imputation..." -> Y = 22
                 if (beneficeReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(overPage2, formatNombre(beneficeReel), 485, 86, PdfContentByte.ALIGN_RIGHT);
-                    ecrireTexteAligne(overPage2, formatNombre(beneficeReel), 485, 23, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(beneficeReel), 492, 88, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(beneficeReel), 492, 22, PdfContentByte.ALIGN_RIGHT);
                 } else if (deficitReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(overPage2, formatNombre(deficitReel), 585, 86, PdfContentByte.ALIGN_RIGHT);
-                    ecrireTexteAligne(overPage2, formatNombre(deficitReel), 585, 23, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(deficitReel), 566, 88, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(deficitReel), 566, 22, PdfContentByte.ALIGN_RIGHT);
                 }
                 
                 overPage2.endText();
@@ -187,18 +192,18 @@ public class DeclarationPdfService {
                 BigDecimal dispos = bilan.recettesBrutes().subtract(bilan.depensesRetenues());
                 if (dispos.compareTo(BigDecimal.ZERO) < 0) dispos = BigDecimal.ZERO;
 
-                // Immobilisations corporelles (028, 030, 032) -> Y = 560
-                ecrireTexteAligne(overPage1, formatNombre(immoBrut), 485, 560, PdfContentByte.ALIGN_RIGHT);
-                ecrireTexteAligne(overPage1, formatNombre(immoAmort), 545, 560, PdfContentByte.ALIGN_RIGHT);
-                ecrireTexteAligne(overPage1, formatNombre(immoNet), 590, 560, PdfContentByte.ALIGN_RIGHT);
+                // Immobilisations corporelles (028, 030, 032) -> Y = 558
+                ecrireTexteAligne(overPage1, formatNombre(immoBrut), 418, 558, PdfContentByte.ALIGN_RIGHT);
+                ecrireTexteAligne(overPage1, formatNombre(immoAmort), 492, 558, PdfContentByte.ALIGN_RIGHT);
+                ecrireTexteAligne(overPage1, formatNombre(immoNet), 566, 558, PdfContentByte.ALIGN_RIGHT);
                 
-                // Disponibilités (086 - Net) -> Y = 320
-                ecrireTexteAligne(overPage1, formatNombre(dispos), 590, 320, PdfContentByte.ALIGN_RIGHT);
+                // Disponibilités (086 - Net) -> Y = 318
+                ecrireTexteAligne(overPage1, formatNombre(dispos), 566, 318, PdfContentByte.ALIGN_RIGHT);
                 
-                // Total Actif (110, 112) -> Y = 258
-                ecrireTexteAligne(overPage1, formatNombre(immoBrut.add(dispos)), 485, 258, PdfContentByte.ALIGN_RIGHT);
-                ecrireTexteAligne(overPage1, formatNombre(immoAmort), 545, 258, PdfContentByte.ALIGN_RIGHT);
-                ecrireTexteAligne(overPage1, formatNombre(immoNet.add(dispos)), 590, 258, PdfContentByte.ALIGN_RIGHT);
+                // Total Actif (110, 112) -> Y = 254
+                ecrireTexteAligne(overPage1, formatNombre(immoBrut.add(dispos)), 418, 254, PdfContentByte.ALIGN_RIGHT);
+                ecrireTexteAligne(overPage1, formatNombre(immoAmort), 492, 254, PdfContentByte.ALIGN_RIGHT);
+                ecrireTexteAligne(overPage1, formatNombre(immoNet.add(dispos)), 566, 254, PdfContentByte.ALIGN_RIGHT);
 
                 // Passif
                 BigDecimal beneficeReel = bilan.resultatReelImposable();
@@ -209,12 +214,12 @@ public class DeclarationPdfService {
                 BigDecimal resultPassif = beneficeReel.compareTo(BigDecimal.ZERO) > 0 ? beneficeReel : deficitReel.negate();
                 BigDecimal capitalIndiv = immoNet.add(dispos).subtract(resultPassif);
 
-                // Capital individuel (120) -> Y = 195
-                ecrireTexteAligne(overPage1, formatNombre(capitalIndiv), 590, 195, PdfContentByte.ALIGN_RIGHT);
-                // Résultat de l'exercice (136) -> Y = 150
-                ecrireTexteAligne(overPage1, formatNombre(resultPassif), 590, 150, PdfContentByte.ALIGN_RIGHT);
-                // Total Passif (180) -> Y = 80
-                ecrireTexteAligne(overPage1, formatNombre(capitalIndiv.add(resultPassif)), 590, 80, PdfContentByte.ALIGN_RIGHT);
+                // Capital individuel (120) -> Y = 194
+                ecrireTexteAligne(overPage1, formatNombre(capitalIndiv), 566, 194, PdfContentByte.ALIGN_RIGHT);
+                // Résultat de l'exercice (136) -> Y = 148
+                ecrireTexteAligne(overPage1, formatNombre(resultPassif), 566, 148, PdfContentByte.ALIGN_RIGHT);
+                // Total Passif (180) -> Y = 78
+                ecrireTexteAligne(overPage1, formatNombre(capitalIndiv.add(resultPassif)), 566, 78, PdfContentByte.ALIGN_RIGHT);
 
                 overPage1.endText();
 
@@ -223,38 +228,38 @@ public class DeclarationPdfService {
                 overPage2.beginText();
                 overPage2.setFontAndSize(bf, 8);
 
-                // Chiffre d'affaires prestations (217) -> Y = 585
-                ecrireTexteAligne(overPage2, formatNombre(bilan.recettesBrutes()), 590, 585, PdfContentByte.ALIGN_RIGHT);
-                // Total produits d'exploitation (232) -> Y = 540
-                ecrireTexteAligne(overPage2, formatNombre(bilan.recettesBrutes()), 590, 540, PdfContentByte.ALIGN_RIGHT);
+                // Chiffre d'affaires prestations (217) -> Y = 582
+                ecrireTexteAligne(overPage2, formatNombre(bilan.recettesBrutes()), 566, 582, PdfContentByte.ALIGN_RIGHT);
+                // Total produits d'exploitation (232) -> Y = 538
+                ecrireTexteAligne(overPage2, formatNombre(bilan.recettesBrutes()), 566, 538, PdfContentByte.ALIGN_RIGHT);
 
                 // Charges
-                ecrireTexteAligne(overPage2, formatNombre(totalAchats), 590, 490, PdfContentByte.ALIGN_RIGHT); // Achats (238)
-                ecrireTexteAligne(overPage2, formatNombre(totalAutresChargesExternes), 590, 460, PdfContentByte.ALIGN_RIGHT); // Charges externes (242)
-                ecrireTexteAligne(overPage2, formatNombre(totalImpotsTaxes), 590, 445, PdfContentByte.ALIGN_RIGHT); // Impôts (244)
-                ecrireTexteAligne(overPage2, formatNombre(bilan.amortissementUtilise()), 590, 410, PdfContentByte.ALIGN_RIGHT); // Amortissements (254)
+                ecrireTexteAligne(overPage2, formatNombre(totalAchats), 566, 488, PdfContentByte.ALIGN_RIGHT); // Achats (238)
+                ecrireTexteAligne(overPage2, formatNombre(totalAutresChargesExternes), 566, 458, PdfContentByte.ALIGN_RIGHT); // Charges externes (242)
+                ecrireTexteAligne(overPage2, formatNombre(totalImpotsTaxes), 566, 441, PdfContentByte.ALIGN_RIGHT); // Impôts (244)
+                ecrireTexteAligne(overPage2, formatNombre(bilan.amortissementUtilise()), 566, 408, PdfContentByte.ALIGN_RIGHT); // Amortissements (254)
 
                 BigDecimal totalCharges = totalAchats.add(totalAutresChargesExternes).add(totalImpotsTaxes).add(bilan.amortissementUtilise());
-                ecrireTexteAligne(overPage2, formatNombre(totalCharges), 590, 350, PdfContentByte.ALIGN_RIGHT); // Total charges (264)
+                ecrireTexteAligne(overPage2, formatNombre(totalCharges), 566, 348, PdfContentByte.ALIGN_RIGHT); // Total charges (264)
 
                 BigDecimal resultExploit = bilan.recettesBrutes().subtract(totalCharges);
-                ecrireTexteAligne(overPage2, formatNombre(resultExploit), 590, 325, PdfContentByte.ALIGN_RIGHT); // Résultat d'exploitation (270)
+                ecrireTexteAligne(overPage2, formatNombre(resultExploit), 566, 322, PdfContentByte.ALIGN_RIGHT); // Résultat d'exploitation (270)
 
-                // Résultat fiscal (312 / 314) -> Y = 250
+                // Résultat fiscal (312 / 314) -> Y = 248
                 if (resultExploit.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(overPage2, formatNombre(resultExploit), 485, 250, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(resultExploit), 492, 248, PdfContentByte.ALIGN_RIGHT);
                 } else {
-                    ecrireTexteAligne(overPage2, formatNombre(resultExploit.abs()), 590, 250, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(resultExploit.abs()), 566, 248, PdfContentByte.ALIGN_RIGHT);
                 }
 
-                // Déduction amortissements utilisés (350) -> Y = 180
-                ecrireTexteAligne(overPage2, formatNombre(bilan.amortissementUtilise()), 590, 180, PdfContentByte.ALIGN_RIGHT);
+                // Déduction amortissements utilisés (350) -> Y = 178
+                ecrireTexteAligne(overPage2, formatNombre(bilan.amortissementUtilise()), 566, 178, PdfContentByte.ALIGN_RIGHT);
                 
-                // Résultat fiscal final (352 / 354) -> Y = 110
+                // Résultat fiscal final (352 / 354) -> Y = 108
                 if (beneficeReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(overPage2, formatNombre(beneficeReel), 485, 110, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(beneficeReel), 492, 108, PdfContentByte.ALIGN_RIGHT);
                 } else if (deficitReel.compareTo(BigDecimal.ZERO) > 0) {
-                    ecrireTexteAligne(overPage2, formatNombre(deficitReel), 590, 110, PdfContentByte.ALIGN_RIGHT);
+                    ecrireTexteAligne(overPage2, formatNombre(deficitReel), 566, 108, PdfContentByte.ALIGN_RIGHT);
                 }
 
                 overPage2.endText();
@@ -276,12 +281,12 @@ public class DeclarationPdfService {
                     }
                 }
 
-                // Tableau Immos (Constructions) -> Y = 680
-                ecrireTexteAligne(overPage3, formatNombre(immoDebut), 325, 680, PdfContentByte.ALIGN_RIGHT); // Début (430)
-                ecrireTexteAligne(overPage3, formatNombre(immoAug), 405, 680, PdfContentByte.ALIGN_RIGHT); // Augmentation (432)
-                ecrireTexteAligne(overPage3, formatNombre(immoDebut.add(immoAug)), 565, 680, PdfContentByte.ALIGN_RIGHT); // Fin (436)
+                // Tableau Immos (Constructions) -> Y = 678
+                ecrireTexteAligne(overPage3, formatNombre(immoDebut), 325, 678, PdfContentByte.ALIGN_RIGHT); // Début (430)
+                ecrireTexteAligne(overPage3, formatNombre(immoAug), 405, 678, PdfContentByte.ALIGN_RIGHT); // Augmentation (432)
+                ecrireTexteAligne(overPage3, formatNombre(immoDebut.add(immoAug)), 565, 678, PdfContentByte.ALIGN_RIGHT); // Fin (436)
 
-                // Tableau Amortissements (Constructions) -> Y = 500
+                // Tableau Amortissements (Constructions) -> Y = 498
                 BigDecimal amortDebut = BigDecimal.ZERO;
                 BigDecimal amortDot = bilan.amortissementUtilise();
                 for (BienAmortissable b : biens) {
@@ -293,9 +298,9 @@ public class DeclarationPdfService {
                     amortDebut = amortDebut.add(annuel.multiply(BigDecimal.valueOf(anneesAmortiesAvant)));
                 }
 
-                ecrireTexteAligne(overPage3, formatNombre(amortDebut), 325, 500, PdfContentByte.ALIGN_RIGHT); // Début (520)
-                ecrireTexteAligne(overPage3, formatNombre(amortDot), 405, 500, PdfContentByte.ALIGN_RIGHT); // Dotation (522)
-                ecrireTexteAligne(overPage3, formatNombre(amortDebut.add(amortDot)), 565, 500, PdfContentByte.ALIGN_RIGHT); // Fin (526)
+                ecrireTexteAligne(overPage3, formatNombre(amortDebut), 325, 498, PdfContentByte.ALIGN_RIGHT); // Début (520)
+                ecrireTexteAligne(overPage3, formatNombre(amortDot), 405, 498, PdfContentByte.ALIGN_RIGHT); // Dotation (522)
+                ecrireTexteAligne(overPage3, formatNombre(amortDebut.add(amortDot)), 565, 498, PdfContentByte.ALIGN_RIGHT); // Fin (526)
 
                 overPage3.endText();
             }
