@@ -10,6 +10,7 @@ import { JustificatifsComponent } from './components/justificatifs/justificatifs
 import { AdministrationComponent } from './components/administration/administration.component';
 import { ChecklistsComponent } from './components/checklists/checklists.component';
 import { BilanAnnuelComponent } from './components/bilan-annuel/bilan-annuel.component';
+import { GuideFiscalComponent } from './components/guide-fiscal/guide-fiscal.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -23,6 +24,7 @@ export const routes: Routes = [
   { path: 'justificatifs', component: JustificatifsComponent, canActivate: [authGuard] },
   { path: 'checklists', component: ChecklistsComponent, canActivate: [authGuard] },
   { path: 'bilan-annuel', component: BilanAnnuelComponent, canActivate: [authGuard] },
+  { path: 'guide-fiscal', component: GuideFiscalComponent, canActivate: [authGuard] },
   { path: 'administration', component: AdministrationComponent, canActivate: [authGuard] },
   { path: '', redirectTo: '/tableau-de-bord', pathMatch: 'full' },
   { path: '**', redirectTo: '/tableau-de-bord' }

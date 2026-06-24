@@ -7,6 +7,13 @@
         Comparez le régime Réel et le Micro-BIC pour optimiser vos impôts LMNP.
       </p>
     </div>
+    <a [routerLink]="['/guide-fiscal']" class="btn-guide" title="Consulter le guide d'explication de la fiscalité LMNP">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      <span>Guide Fiscal LMNP</span>
+    </a>
   </header>
 
   <!-- Error display -->
@@ -382,6 +389,15 @@
             Pour vos déclarations fiscales officielles de revenus (déclaration de revenus 2042-C-PRO, déclaration de résultat 2031 et annexes 2033), 
             veuillez valider les calculs auprès d'un expert-comptable ou vous référer au site officiel <a href="https://www.impots.gouv.fr" target="_blank" rel="noopener noreferrer">impots.gouv.fr</a>.
           </p>
+          <div style="margin-top: 1rem;">
+            <a [routerLink]="['/guide-fiscal']" class="btn-guide" style="background-color: white; border-color: #cbd5e1; color: #475569;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+              <span>Consulter le Guide Fiscal Complet</span>
+            </a>
+          </div>
         </div>
       </div>
     }

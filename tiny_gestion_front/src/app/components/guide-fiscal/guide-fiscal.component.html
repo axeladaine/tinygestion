@@ -1,0 +1,249 @@
+<div class="page-container">
+  <!-- En-tête -->
+  <header class="header-section">
+    <div class="header-title-area">
+      <h2>Guide Fiscal LMNP & Tiny House</h2>
+      <p class="section-desc">
+        Comprenez facilement le fonctionnement des impôts, de l'amortissement et des déclarations pour votre Tiny House.
+      </p>
+    </div>
+  </header>
+
+  <!-- Navigation par Onglets Locaux -->
+  <nav class="guide-tabs">
+    <button (click)="changerOnglet('lmnp')" [class.active]="ongletActif === 'lmnp'" class="tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Bases LMNP</span>
+    </button>
+    <button (click)="changerOnglet('comparatif')" [class.active]="ongletActif === 'comparatif'" class="tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 12h6"/><path d="M9 16h6"/><path d="M12 8h.01"/></svg>
+      <span>Micro-BIC vs Réel</span>
+    </button>
+    <button (click)="changerOnglet('amortissement')" [class.active]="ongletActif === 'amortissement'" class="tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>L'Amortissement</span>
+    </button>
+    <button (click)="changerOnglet('cfe')" [class.active]="ongletActif === 'cfe'" class="tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>La CFE</span>
+    </button>
+    <button (click)="changerOnglet('calendrier')" [class.active]="ongletActif === 'calendrier'" class="tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+      <span>Échéancier</span>
+    </button>
+  </nav>
+
+  <!-- Contenu Conditionnel -->
+  <div class="guide-content-area">
+
+    <!-- CHAPITRE 1 : Les bases du LMNP -->
+    @if (ongletActif === 'lmnp') {
+      <div class="guide-card animate-fade">
+        <h3>Le statut LMNP (Loueur en Meublé Non Professionnel)</h3>
+        <p class="intro-paragraph">
+          Toute location d'un logement garni de meubles suffisants à la vie quotidienne (ce qui est le cas de votre Tiny House louée sur Airbnb ou en direct) relève fiscalement de l'activité de **Location Meublée Non Professionnelle (LMNP)**.
+        </p>
+
+        <div class="info-grid">
+          <div class="info-box">
+            <h5>Une activité commerciale</h5>
+            <p>Contrairement à la location nue (revenus fonciers), la location meublée est considérée comme une activité commerciale. Vos revenus sont imposés dans la catégorie des <strong>Bénéfices Industriels et Commerciaux (BIC)</strong>.</p>
+          </div>
+          <div class="info-box">
+            <h5>L'obligation du SIRET</h5>
+            <p>Vous devez obligatoirement déclarer votre activité sur le Guichet Unique de l'INPI dans les <strong>15 jours</strong> suivant le début de la location. C'est gratuit et cela vous permet d'obtenir un numéro SIRET nécessaire pour vos déclarations.</p>
+          </div>
+        </div>
+
+        <div class="alert-box alert-info">
+          <h5>LMNP vs LMP (Professionnel)</h5>
+          <p>
+            Vous restez non professionnel (LMNP) tant que vos recettes annuelles de location meublée sont inférieures à <strong>23 000 €</strong> OU que ces recettes représentent moins de 50% des revenus de votre foyer fiscal. Au-delà des deux seuils, vous passez en statut professionnel (LMP), soumis à des cotisations sociales plus lourdes.
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- CHAPITRE 2 : Comparatif Micro-BIC vs Réel -->
+    @if (ongletActif === 'comparatif') {
+      <div class="guide-card animate-fade">
+        <h3>Micro-BIC vs Régime Réel : Quel est le meilleur choix ?</h3>
+        <p>
+          L'arbitrage entre ces deux régimes est l'élément le plus important pour réduire vos impôts. L'application calcule chaque année pour vous lequel est le plus optimisé, mais voici leurs différences :
+        </p>
+
+        <div class="comparison-table-wrapper">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Critère</th>
+                <th class="badge-micro">Régime Micro-BIC</th>
+                <th class="badge-reel">Régime Réel Simplifié</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Principe</strong></td>
+                <td>Abattement forfaitaire théorique.</td>
+                <td>Déduction de vos frais réels et amortissements.</td>
+              </tr>
+              <tr>
+                <td><strong>Abattement / Déduction</strong></td>
+                <td>
+                  <strong>50%</strong> (meublé classique) ou<br>
+                  <strong>71%</strong> (si meublé de tourisme classé).
+                </td>
+                <td>
+                  <strong>100% de vos dépenses réelles</strong> + amortissement annuel de la Tiny et des meubles.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Amortissement du bien</strong></td>
+                <td>Impossible.</td>
+                <td><strong>Oui</strong> (le plus gros levier fiscal).</td>
+              </tr>
+              <tr>
+                <td><strong>Déficits générés</strong></td>
+                <td>Impossible de créer un déficit.</td>
+                <td>Reportables sur vos bénéfices LMNP pendant 10 ans.</td>
+              </tr>
+              <tr>
+                <td><strong>Obligations comptables</strong></td>
+                <td>Très simples (tenue d'un livre des recettes).</td>
+                <td>Dépôt d'une liasse fiscale (formulaires 2031 & 2033).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="recommendation-summary-box">
+          <h5>💡 Règle générale d'arbitrage :</h5>
+          <p>
+            Si le montant total de vos charges annuelles (intérêts d'emprunt, électricité, eau, abonnements, assurance, entretien) additionné à l'<strong>amortissement annuel</strong> de votre Tiny House dépasse l'abattement forfaitaire de 50% (ou 71%), alors le <strong>Régime Réel est largement plus avantageux</strong> (votre impôt sur ces revenus tombe généralement à 0 €).
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- CHAPITRE 3 : Comprendre l'Amortissement -->
+    @if (ongletActif === 'amortissement') {
+      <div class="guide-card animate-fade">
+        <h3>Comment fonctionne l'Amortissement ?</h3>
+        <p class="intro-paragraph">
+          L'amortissement est un mécanisme comptable qui constate la perte de valeur théorique (usure) d'un bien au fil du temps. En LMNP, cela vous autorise à déduire chaque année une fraction du prix d'achat du logement et des équipements de vos recettes.
+        </p>
+
+        <div class="steps-container">
+          <div class="step-card">
+            <span class="step-num">1</span>
+            <h5>Amortissement des murs (Le bien)</h5>
+            <p>La Tiny House elle-même (hors valeur du terrain) s'amortit généralement sur une durée de <strong>10 à 20 ans</strong> (soit 5% à 10% du prix déduit chaque année).</p>
+          </div>
+          <div class="step-card">
+            <span class="step-num">2</span>
+            <h5>Amortissement des meubles & matériel</h5>
+            <p>Le mobilier (lit, canapé, électroménager), le matériel et les travaux s'amortissent sur des durées plus courtes de <strong>5 à 10 ans</strong> (soit 10% à 20% par an).</p>
+          </div>
+          <div class="step-card">
+            <span class="step-num">3</span>
+            <h5>Plafonnement de la déduction</h5>
+            <p>La dotation aux amortissements ne peut pas créer de déficit comptable par elle-même. Elle peut réduire votre résultat net à <strong>0 €</strong>, mais l'excédent non utilisé est conservé en report sur les années suivantes.</p>
+          </div>
+        </div>
+
+        <div class="example-box">
+          <h4>Exemple chiffré concret :</h4>
+          <p>
+            Imaginons une Tiny House achetée <strong>90 000 €</strong> amortie sur 15 ans, et <strong>15 000 €</strong> de revenus locatifs bruts (loyers Airbnb) sur l'année. Vos dépenses d'exploitation (charges) s'élèvent à 3 000 €.
+          </p>
+          <div class="math-box">
+            <ul>
+              <li><strong>Amortissement annuel Tiny House</strong> : 90 000 € / 15 ans = <strong>6 000 € / an</strong>.</li>
+              <li><strong>Calcul du résultat net imposable</strong> :
+                <br>Recettes (15 000 €) - Charges (3 000 €) - Amortissement (6 000 €) = <strong>6 000 €</strong> soumis à l'impôt au Réel.
+              </li>
+              <li><em>(Au Micro-BIC, vous auriez été imposé sur 50% ou 29% des 15 000 € de recettes, soit 7 500 € ou 4 350 € d'assiette fiscale).</em></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- CHAPITRE 4 : La Cotisation Foncière des Entreprises (CFE) -->
+    @if (ongletActif === 'cfe') {
+      <div class="guide-card animate-fade">
+        <h3>La CFE (Cotisation Foncière des Entreprises)</h3>
+        <p>
+          La CFE est un impôt local obligatoire dû par toutes les personnes physiques ou morales qui exercent une activité professionnelle non salariée, y compris les loueurs en meublé non professionnels.
+        </p>
+
+        <div class="info-grid">
+          <div class="info-box border-green">
+            <h5 style="color: var(--green);">Le seuil d'exonération de 5 000 €</h5>
+            <p>
+              Si vos recettes brutes annuelles (le Chiffre d'Affaires de l'activité LMNP) sont <strong>inférieures ou égales à 5 000 €</strong> sur l'année N-2, vous êtes <strong>totalement exonéré</strong> du paiement de la CFE minimum. L'application vérifie cela et affiche automatiquement votre statut d'exonération.
+            </p>
+          </div>
+          <div class="info-box">
+            <h5>Comment est-elle calculée ?</h5>
+            <p>
+              Au-delà de 5 000 € de recettes, vous payez une cotisation minimale qui dépend de la valeur locative de votre logement et du taux fixé par votre commune. Elle se situe généralement entre <strong>150 € et 650 € par an</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="alert-box alert-warning">
+          <h5>Début d'activité : Formulaire 1447-C-SD obligatoire</h5>
+          <p>
+            Vous êtes exonéré de CFE à 100% lors de votre **première année d'activité** (l'année civile de début de vos locations). Cependant, pour valider cette exonération, vous devez obligatoirement remplir et renvoyer le formulaire **1447-C-SD** (Déclaration initiale de CFE) à votre Service des Impôts des Entreprises (SIE) avant le <strong>31 décembre</strong> de cette première année.
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- CHAPITRE 5 : Calendrier Fiscal -->
+    @if (ongletActif === 'calendrier') {
+      <div class="guide-card animate-fade">
+        <h3>Votre Calendrier Fiscal LMNP</h3>
+        <p>
+          Pour gérer sereinement votre Tiny House, voici les grandes étapes administratives et fiscales de l'année à anticiper :
+        </p>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-badge">Début d'activité</div>
+            <div class="timeline-content">
+              <h5>Déclaration de début d'activité (INPI)</h5>
+              <p>À faire sur le guichet unique de l'INPI dans les 15 jours suivant la première mise en location pour obtenir votre SIRET.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-badge">Avant mai</div>
+            <div class="timeline-content">
+              <h5>Envoi de la liasse fiscale (Régime Réel uniquement)</h5>
+              <p>Si vous êtes au régime Réel, vous devez télétransmettre la liasse fiscale (formulaire 2031 et ses annexes 2033) aux impôts. Il est courant de confier cette tâche à un expert-comptable ou à un logiciel spécialisé.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-badge">Mai - Juin</div>
+            <div class="timeline-content">
+              <h5>Déclaration de revenus personnelle (2042-C-PRO)</h5>
+              <p>Reportez les chiffres clés dans votre déclaration de revenus classique (les cases 5ND/5NG pour le Micro-BIC, ou 5NA/5NY pour le Réel) comme indiqué sur votre écran Bilan Fiscal dans l'application.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-badge">Décembre</div>
+            <div class="timeline-content">
+              <h5>Paiement de la CFE (impots.gouv.fr pro)</h5>
+              <p>Consultez votre avis de CFE en ligne sur votre espace professionnel (aucun avis n'est envoyé par courrier). Le paiement doit être effectué en ligne avant le 15 décembre.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
