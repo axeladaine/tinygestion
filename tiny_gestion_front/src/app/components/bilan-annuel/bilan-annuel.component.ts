@@ -68,4 +68,28 @@ export class BilanAnnuelComponent implements OnInit {
   onAnneeChange(): void {
     this.chargerBilan();
   }
+
+  telechargementEnCours: boolean = false;
+
+  exporterPdf(): void {
+    if (!this.logementActif || !this.logementActif.id) return;
+    
+    this.telechargementEnCours = true;
+    this.bilanService.telechargerDeclarationPdf(this.logementActif.id, this.anneeSelectionnee).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `declaration_fiscale_${this.logementActif?.nom || 'lmnp'}_${this.anneeSelectionnee}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.telechargementEnCours = false;
+      },
+      error: (err) => {
+        console.error('Erreur lors du téléchargement du PDF', err);
+        this.messageErreur = 'Erreur lors du téléchargement de la déclaration PDF.';
+        this.telechargementEnCours = false;
+      }
+    });
+  }
 }

@@ -13,4 +13,10 @@ export class BilanFiscalService {
   getBilanFiscal(logementId: number, annee: number): Observable<BilanFiscal> {
     return this.http.get<BilanFiscal>(`${this.url}/logement/${logementId}/annee/${annee}`);
   }
+
+  telechargerDeclarationPdf(logementId: number, annee: number): Observable<Blob> {
+    return this.http.get(`${this.url}/logement/${logementId}/annee/${annee}/export-pdf`, {
+      responseType: 'blob'
+    });
+  }
 }

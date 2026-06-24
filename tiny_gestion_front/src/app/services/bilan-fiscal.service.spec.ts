@@ -48,4 +48,17 @@ describe('BilanFiscalService', () => {
     expect(req.request.method).toBe('GET');
     req.flush(mockBilan);
   });
+
+  it('should download declaration PDF from API', () => {
+    const mockBlob = new Blob(['pdf-content'], { type: 'application/pdf' });
+
+    service.telechargerDeclarationPdf(10, 2026).subscribe(data => {
+      expect(data).toEqual(mockBlob);
+    });
+
+    const req = httpMock.expectOne('/api/bilan-fiscal/logement/10/annee/2026/export-pdf');
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+    req.flush(mockBlob);
+  });
 });
