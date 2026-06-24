@@ -9,6 +9,7 @@ export interface Logement {
   estSurTerrainResidencePrincipale: boolean;
   estLoueCourteDuree: boolean;
   estMeubleTourisme: boolean;
+  initialise: boolean;
   dateDebutLocation?: string;
   dateCreation?: string;
   dateModification?: string;

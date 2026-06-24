@@ -3,6 +3,7 @@ package fr.denebolar.tinygestion.controller;
 import fr.denebolar.tinygestion.domain.Logement;
 import fr.denebolar.tinygestion.domain.Utilisateur;
 import fr.denebolar.tinygestion.service.LogementService;
+import fr.denebolar.tinygestion.dto.logement.InitialisationLogementDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,5 +40,14 @@ public class LogementController {
             @AuthenticationPrincipal Utilisateur user
     ) {
         return ResponseEntity.ok(logementService.updateLogement(id, logement, user));
+    }
+
+    @PostMapping("/{id}/initialiser")
+    public ResponseEntity<Logement> initialiserLogement(
+            @PathVariable Long id,
+            @RequestBody InitialisationLogementDto dto,
+            @AuthenticationPrincipal Utilisateur user
+    ) {
+        return ResponseEntity.ok(logementService.initialiserLogement(id, dto, user));
     }
 }

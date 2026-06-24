@@ -53,6 +53,9 @@ public class Logement {
     @Column(name = "est_meuble_tourisme")
     private boolean estMeubleTourisme;
 
+    @Column(name = "initialise", nullable = false)
+    private boolean initialise = false;
+
     @Column(name = "date_debut_location")
     private LocalDate dateDebutLocation;
 

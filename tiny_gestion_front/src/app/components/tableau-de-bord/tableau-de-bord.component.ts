@@ -12,11 +12,12 @@ import { Logement } from '../../models/logement.model';
 import { Recette } from '../../models/recette.model';
 import { Depense } from '../../models/depense.model';
 import { BienAmortissable } from '../../models/bien-amortissable.model';
+import { OnboardingInitialisationComponent } from '../onboarding-initialisation/onboarding-initialisation.component';
 
 @Component({
   selector: 'app-tableau-de-bord',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, OnboardingInitialisationComponent],
   templateUrl: './tableau-de-bord.component.html',
   styleUrls: ['./tableau-de-bord.component.css']
 })
@@ -196,6 +197,12 @@ export class TableauDeBordComponent implements OnInit {
 
   get onboardingTermine(): boolean {
     return this.step1Complete && this.step2Complete && this.step3Complete && this.step4Complete;
+  }
+
+  onOnboardingTermine(logementMisAJour: Logement): void {
+    this.logementSelectionne = logementMisAJour;
+    this.chargerStats();
+    this.chargerDonneesSuivi();
   }
 
   deconnexion(): void {

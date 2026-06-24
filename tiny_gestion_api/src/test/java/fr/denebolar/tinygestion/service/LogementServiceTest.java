@@ -1,7 +1,10 @@
 package fr.denebolar.tinygestion.service;
 
 import fr.denebolar.tinygestion.domain.*;
+import fr.denebolar.tinygestion.dto.logement.InitialisationLogementDto;
+import fr.denebolar.tinygestion.repository.DepenseRepository;
 import fr.denebolar.tinygestion.repository.LogementRepository;
+import fr.denebolar.tinygestion.repository.RecetteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +25,12 @@ public class LogementServiceTest {
 
     @Mock
     private LogementRepository logementRepository;
+
+    @Mock
+    private RecetteRepository recetteRepository;
+
+    @Mock
+    private DepenseRepository depenseRepository;
 
     @InjectMocks
     private LogementService service;
@@ -124,5 +134,43 @@ public class LogementServiceTest {
         assertTrue(result.isEstDeplacable());
         assertTrue(result.isEstMeubleTourisme());
         verify(logementRepository, times(1)).save(logement);
+    }
+
+    @Test
+    public void should_initialize_logement_with_initial_data() {
+        InitialisationLogementDto dto = new InitialisationLogementDto(
+                BigDecimal.valueOf(5000.00),
+                BigDecimal.valueOf(1200.00)
+        );
+
+        when(logementRepository.findById(10L)).thenReturn(Optional.of(logement));
+        when(logementRepository.save(any(Logement.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Logement result = service.initialiserLogement(10L, dto, user);
+
+        assertNotNull(result);
+        assertTrue(result.isInitialise());
+        verify(logementRepository, times(1)).save(logement);
+        verify(recetteRepository, times(1)).save(any(Recette.class));
+        verify(depenseRepository, times(1)).save(any(Depense.class));
+    }
+
+    @Test
+    public void should_initialize_logement_without_initial_data() {
+        InitialisationLogementDto dto = new InitialisationLogementDto(
+                BigDecimal.ZERO,
+                BigDecimal.ZERO
+        );
+
+        when(logementRepository.findById(10L)).thenReturn(Optional.of(logement));
+        when(logementRepository.save(any(Logement.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Logement result = service.initialiserLogement(10L, dto, user);
+
+        assertNotNull(result);
+        assertTrue(result.isInitialise());
+        verify(logementRepository, times(1)).save(logement);
+        verify(recetteRepository, never()).save(any(Recette.class));
+        verify(depenseRepository, never()).save(any(Depense.class));
     }
 }

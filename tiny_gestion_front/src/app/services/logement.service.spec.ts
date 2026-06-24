@@ -69,4 +69,18 @@ describe('LogementService', () => {
     expect(req.request.method).toBe('PUT');
     req.flush(updatedLogement);
   });
+
+  it('should initialize lodging via POST to initialiser endpoint', () => {
+    const mockLogement: Logement = { id: 10, nom: 'Tiny du Lac', initialise: true } as any as Logement;
+    const initData = { recettesAnterieures: 4500, depensesAnterieures: 850 };
+
+    service.initialiserLogement(10, initData).subscribe(data => {
+      expect(data).toEqual(mockLogement);
+    });
+
+    const req = httpMock.expectOne('/api/logements/10/initialiser');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(initData);
+    req.flush(mockLogement);
+  });
 });

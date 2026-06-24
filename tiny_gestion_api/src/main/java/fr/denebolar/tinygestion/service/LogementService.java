@@ -1,13 +1,16 @@
 package fr.denebolar.tinygestion.service;
 
-import fr.denebolar.tinygestion.domain.Logement;
-import fr.denebolar.tinygestion.domain.Proprietaire;
-import fr.denebolar.tinygestion.domain.Utilisateur;
+import fr.denebolar.tinygestion.domain.*;
+import fr.denebolar.tinygestion.dto.logement.InitialisationLogementDto;
+import fr.denebolar.tinygestion.repository.DepenseRepository;
 import fr.denebolar.tinygestion.repository.LogementRepository;
+import fr.denebolar.tinygestion.repository.RecetteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,6 +19,8 @@ import java.util.List;
 public class LogementService {
 
     private final LogementRepository logementRepository;
+    private final RecetteRepository recetteRepository;
+    private final DepenseRepository depenseRepository;
 
     private Proprietaire getProprietaireFromUser(Utilisateur user) {
         if (user.getProprietaire() != null) {
@@ -50,6 +55,7 @@ public class LogementService {
             throw new RuntimeException("L'utilisateur connecté n'est pas associé à un propriétaire");
         }
         logement.setProprietaire(proprietaire);
+        logement.setInitialise(false); // Par défaut non initialisé pour les nouveaux logements
         return logementRepository.save(logement);
     }
 
@@ -67,5 +73,42 @@ public class LogementService {
         logement.setEstMeubleTourisme(logementDetails.isEstMeubleTourisme());
         logement.setDateDebutLocation(logementDetails.getDateDebutLocation());
         return logementRepository.save(logement);
+    }
+
+    @Transactional
+    public Logement initialiserLogement(Long id, InitialisationLogementDto dto, Utilisateur connectedUser) {
+        Logement logement = getLogementById(id, connectedUser);
+        logement.setInitialise(true);
+        Logement savedLogement = logementRepository.save(logement);
+
+        int anneeCourante = LocalDate.now().getYear();
+        LocalDate dateInit = LocalDate.of(anneeCourante, 1, 1);
+
+        if (dto.recettesAnterieures() != null && dto.recettesAnterieures().compareTo(BigDecimal.ZERO) > 0) {
+            Recette recette = Recette.builder()
+                    .logement(savedLogement)
+                    .montantBrut(dto.recettesAnterieures())
+                    .dateEncaissement(dateInit)
+                    .plateforme(Plateforme.AUTRE)
+                    .nomClient("Initialisation Didacticiel")
+                    .commentaire("Historique Recettes - Initialisation " + anneeCourante)
+                    .build();
+            recetteRepository.save(recette);
+        }
+
+        if (dto.depensesAnterieures() != null && dto.depensesAnterieures().compareTo(BigDecimal.ZERO) > 0) {
+            Depense depense = Depense.builder()
+                    .logement(savedLogement)
+                    .montantTtc(dto.depensesAnterieures())
+                    .dateDepense(dateInit)
+                    .fournisseur("Initialisation Didacticiel")
+                    .commentaire("Historique Dépenses - Initialisation " + anneeCourante)
+                    .statutDeductibilite(StatutDeductibilite.DEDUCTIBLE)
+                    .montantRetenu(dto.depensesAnterieures())
+                    .build();
+            depenseRepository.save(depense);
+        }
+
+        return savedLogement;
     }
 }

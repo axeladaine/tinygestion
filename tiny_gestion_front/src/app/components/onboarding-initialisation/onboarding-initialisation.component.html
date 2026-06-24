@@ -1,0 +1,128 @@
+<div class="onboarding-overlay">
+  <div class="onboarding-card animate-fade">
+    
+    <!-- Header -->
+    <div class="onboarding-header">
+      <div class="logo-area">
+        <span class="logo-icon">✨</span>
+        <span class="logo-text">Bienvenue sur MyTiny</span>
+      </div>
+      <div class="step-indicator">Étape {{ etapeActive }} sur 2</div>
+    </div>
+
+    <!-- Etape 1 : Présentation de l'application -->
+    @if (etapeActive === 1) {
+      <div class="onboarding-content animate-slide">
+        <h3 class="title">Prêt à piloter l'activité de votre Tiny House ?</h3>
+        <p class="subtitle">
+          MyTiny vous accompagne en toute autonomie dans votre gestion et vos déclarations fiscales. Voici un aperçu rapide des rubriques clés à votre disposition :
+        </p>
+
+        <div class="sections-list">
+          <div class="section-item">
+            <div class="section-icon icon-dashboard">📊</div>
+            <div class="section-details">
+              <h6>Tableau de Bord</h6>
+              <p>Visualisez en un clin d'œil votre chiffre d'affaires, vos charges de l'année et vos tâches du mois.</p>
+            </div>
+          </div>
+
+          <div class="section-item">
+            <div class="section-icon icon-transactions">💸</div>
+            <div class="section-details">
+              <h6>Recettes & Dépenses</h6>
+              <p>Saisissez vos loyers et vos factures, et associez-y vos justificatifs au format photo ou PDF.</p>
+            </div>
+          </div>
+
+          <div class="section-item">
+            <div class="section-icon icon-assets">🏠</div>
+            <div class="section-details">
+              <h6>Biens & Tiny House (Amortissements)</h6>
+              <p>Déclarez la valeur d'achat de votre Tiny et de vos meubles pour que l'application calcule automatiquement les amortissements (le levier pour payer 0 € d'impôt).</p>
+            </div>
+          </div>
+
+          <div class="section-item">
+            <div class="section-icon icon-tax">⚖️</div>
+            <div class="section-details">
+              <h6>Bilan Fiscal & Arbitrage</h6>
+              <p>L'application compare le Micro-BIC et le Réel pour vous conseiller le plus avantageux, et vous fournit les bonnes cases à remplir (5NI, 5NH ou 5NG) pour vos déclarations.</p>
+            </div>
+          </div>
+
+          <div class="section-item">
+            <div class="section-icon icon-guide">📚</div>
+            <div class="section-details">
+              <h6>Guide Fiscal LMNP</h6>
+              <p>Toutes les règles indispensables (SIRET, CFE, tranches, amortissements) expliquées de manière claire, sans jargon de comptable.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="onboarding-actions">
+          <button (click)="passerDidacticiel()" class="btn-skip" [disabled]="sauvegardeEnCours">
+            Passer la présentation
+          </button>
+          <button (click)="suivant()" class="btn-next">
+            Suivant
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Etape 2 : Initialisation fiscale de l'année courante -->
+    @if (etapeActive === 2) {
+      <div class="onboarding-content animate-slide">
+        <h3 class="title">Initialisez votre année fiscale {{ anneeCourante }}</h3>
+        <p class="subtitle">
+          Si vous commencez à utiliser MyTiny en cours d'année, vous avez probablement déjà perçu des loyers ou engagé des frais depuis le 1er janvier. Renseignez ces chiffres ci-dessous pour que vos rapports annuels soient corrects :
+        </p>
+
+        <form (ngSubmit)="enregistrerEtTerminer()" #initForm="ngForm" class="onboarding-form">
+          <div class="form-group">
+            <label for="recettes">Recettes antérieures perçues en {{ anneeCourante }} (€ brut)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">€</span>
+              <input type="number" id="recettes" name="recettes" [(ngModel)]="recettesAnterieures" min="0" placeholder="Ex. 4500" class="form-control">
+            </div>
+            <span class="form-help">Cumul de tous les loyers bruts encaissés sur des plateformes (Airbnb, Booking...) ou en direct depuis le 1er janvier de cette année.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="depenses">Dépenses antérieures payées en {{ anneeCourante }} (€ TTC)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">€</span>
+              <input type="number" id="depenses" name="depenses" [(ngModel)]="depensesAnterieures" min="0" placeholder="Ex. 850" class="form-control">
+            </div>
+            <span class="form-help">Cumul de tous vos frais d'exploitation déductibles réglés cette année (assurance, entretien, abonnements, électricité, eau, petits équipements...).</span>
+          </div>
+
+          <div class="info-alert">
+            💡 **Note :** Si vous n'avez pas de chiffres antérieurs ou préférez saisir vos transactions en détail plus tard, vous pouvez laisser ces champs à **0 €**.
+          </div>
+
+          <div class="onboarding-actions">
+            <button type="button" (click)="precedent()" class="btn-back" [disabled]="sauvegardeEnCours">
+              Retour
+            </button>
+            <div class="action-right">
+              <button type="button" (click)="passerDidacticiel()" class="btn-skip" [disabled]="sauvegardeEnCours" style="margin-right: 1rem;">
+                Passer sans saisir
+              </button>
+              <button type="submit" class="btn-submit" [disabled]="initForm.invalid || sauvegardeEnCours">
+                @if (sauvegardeEnCours) {
+                  <span class="spinner"></span>
+                  <span>Initialisation...</span>
+                } @else {
+                  <span>C'est parti !</span>
+                }
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    }
+
+  </div>
+</div>

@@ -46,7 +46,8 @@ export class FicheLogementComponent implements OnInit {
             estDeplacable: true,
             estSurTerrainResidencePrincipale: false,
             estLoueCourteDuree: true,
-            estMeubleTourisme: false
+            estMeubleTourisme: false,
+            initialise: false
           };
         }
         this.chargement = false;

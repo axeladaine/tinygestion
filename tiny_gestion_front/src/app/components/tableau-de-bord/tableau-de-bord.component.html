@@ -353,4 +353,11 @@
       }
     }
   }
+
+  @if (logementSelectionne && !logementSelectionne.initialise) {
+    <app-onboarding-initialisation
+      [logement]="logementSelectionne"
+      (onboardingTermine)="onOnboardingTermine($event)">
+    </app-onboarding-initialisation>
+  }
 </div>
