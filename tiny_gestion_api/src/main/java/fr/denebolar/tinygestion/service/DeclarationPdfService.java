@@ -53,12 +53,12 @@ public class DeclarationPdfService {
             }
         }
 
-        // Fichiers PDF originaux fournis par l'utilisateur
-        String pdf2031Path = "C:\\Users\\UTILISATEUR\\.gemini\\antigravity\\brain\\006b99ff-7e01-45dd-a870-561984859d1f\\media__1782323733909.pdf";
-        String pdf2033Path = "C:\\Users\\UTILISATEUR\\.gemini\\antigravity\\brain\\006b99ff-7e01-45dd-a870-561984859d1f\\media__1782323733914.pdf";
+        // Templates PDF dans les ressources du projet
+        String pdf2031Resource = "/templates/formulaire_2031_template.pdf";
+        String pdf2033Resource = "/templates/formulaire_2033_template.pdf";
 
-        byte[] bytes2031 = stamperDocument(pdf2031Path, annee, logement, bilan, "2031", totalAchats, totalAutresChargesExternes, totalImpotsTaxes, biens, user);
-        byte[] bytes2033 = stamperDocument(pdf2033Path, annee, logement, bilan, "2033", totalAchats, totalAutresChargesExternes, totalImpotsTaxes, biens, user);
+        byte[] bytes2031 = stamperDocument(pdf2031Resource, annee, logement, bilan, "2031", totalAchats, totalAutresChargesExternes, totalImpotsTaxes, biens, user);
+        byte[] bytes2033 = stamperDocument(pdf2033Resource, annee, logement, bilan, "2033", totalAchats, totalAutresChargesExternes, totalImpotsTaxes, biens, user);
 
         // Concaténation des deux fichiers PDF générés en un seul document
         ByteArrayOutputStream finalOut = new ByteArrayOutputStream();
@@ -92,10 +92,13 @@ public class DeclarationPdfService {
         return finalOut.toByteArray();
     }
 
-    private byte[] stamperDocument(String templatePath, Integer annee, Logement logement, BilanFiscalDto bilan, String typeDoc, BigDecimal totalAchats, BigDecimal totalAutresChargesExternes, BigDecimal totalImpotsTaxes, List<BienAmortissable> biens, Utilisateur user) {
+    private byte[] stamperDocument(String templateResourcePath, Integer annee, Logement logement, BilanFiscalDto bilan, String typeDoc, BigDecimal totalAchats, BigDecimal totalAutresChargesExternes, BigDecimal totalImpotsTaxes, List<BienAmortissable> biens, Utilisateur user) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try {
-            PdfReader reader = new PdfReader(templatePath);
+        try (java.io.InputStream templateStream = getClass().getResourceAsStream(templateResourcePath)) {
+            if (templateStream == null) {
+                throw new java.io.FileNotFoundException("Template introuvable : " + templateResourcePath);
+            }
+            PdfReader reader = new PdfReader(templateStream);
             PdfStamper stamper = new PdfStamper(reader, out);
 
             BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.WINANSI, BaseFont.EMBEDDED);
