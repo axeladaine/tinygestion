@@ -77,9 +77,31 @@ public class BilanFiscalService {
         // 5. Calculs du régime Micro-BIC
         boolean estMeubleTourisme = logement.getQualificationLogement() == QualificationLogement.MEUBLE_DE_TOURISME
                 || logement.isEstMeubleTourisme();
-        
-        // abattement de 71% si meublé de tourisme classé, sinon 50%
-        BigDecimal tauxAbattement = estMeubleTourisme ? BigDecimal.valueOf(71) : BigDecimal.valueOf(50);
+        boolean estLoueCourteDuree = logement.isEstLoueCourteDuree();
+
+        BigDecimal tauxAbattement;
+        BigDecimal seuilMicroBic;
+        String caseFiscaleMicroBic;
+
+        if (estLoueCourteDuree) {
+            if (estMeubleTourisme) {
+                // Saisonnier classé
+                tauxAbattement = BigDecimal.valueOf(50); // Loi Le Meur 2026 : classé = 50%
+                seuilMicroBic = BigDecimal.valueOf(83600); // 83 600 €
+                caseFiscaleMicroBic = "5NG";
+            } else {
+                // Saisonnier non classé (Airbnb standard)
+                tauxAbattement = BigDecimal.valueOf(30); // Loi Le Meur 2026 : non classé = 30%
+                seuilMicroBic = BigDecimal.valueOf(15000); // 15 000 €
+                caseFiscaleMicroBic = "5NH";
+            }
+        } else {
+            // Location classique longue durée
+            tauxAbattement = BigDecimal.valueOf(50);
+            seuilMicroBic = BigDecimal.valueOf(83600); // 83 600 €
+            caseFiscaleMicroBic = "5NI";
+        }
+
         BigDecimal abattementMicroBic = recettesBrutes.multiply(tauxAbattement)
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         
@@ -93,15 +115,21 @@ public class BilanFiscalService {
         BigDecimal differenceGainImposable;
 
         // Le régime le plus avantageux est celui dont la base imposable est la plus basse
-        if (resultatReelImposable.compareTo(resultatMicroBicImposable) < 0) {
-            regimeFiscalConseille = "REGIME_REEL_AVANTAGEUX";
-            differenceGainImposable = resultatMicroBicImposable.subtract(resultatReelImposable);
-        } else if (resultatReelImposable.compareTo(resultatMicroBicImposable) > 0) {
-            regimeFiscalConseille = "MICRO_BIC_AVANTAGEUX";
-            differenceGainImposable = resultatReelImposable.subtract(resultatMicroBicImposable);
-        } else {
-            regimeFiscalConseille = "EQUIVALENT";
+        // MAIS si les recettes brutes dépassent le seuil légal du Micro-BIC, le régime réel est obligatoire.
+        if (recettesBrutes.compareTo(seuilMicroBic) > 0) {
+            regimeFiscalConseille = "REGIME_REEL_AVANTAGEUX"; // Forcé car micro-BIC non autorisé
             differenceGainImposable = BigDecimal.ZERO;
+        } else {
+            if (resultatReelImposable.compareTo(resultatMicroBicImposable) < 0) {
+                regimeFiscalConseille = "REGIME_REEL_AVANTAGEUX";
+                differenceGainImposable = resultatMicroBicImposable.subtract(resultatReelImposable);
+            } else if (resultatReelImposable.compareTo(resultatMicroBicImposable) > 0) {
+                regimeFiscalConseille = "MICRO_BIC_AVANTAGEUX";
+                differenceGainImposable = resultatReelImposable.subtract(resultatMicroBicImposable);
+            } else {
+                regimeFiscalConseille = "EQUIVALENT";
+                differenceGainImposable = BigDecimal.ZERO;
+            }
         }
 
         return new BilanFiscalDto(
@@ -118,7 +146,9 @@ public class BilanFiscalService {
                 abattementMicroBic,
                 resultatMicroBicImposable,
                 regimeFiscalConseille,
-                differenceGainImposable
+                differenceGainImposable,
+                estLoueCourteDuree,
+                caseFiscaleMicroBic
         );
     }
 }

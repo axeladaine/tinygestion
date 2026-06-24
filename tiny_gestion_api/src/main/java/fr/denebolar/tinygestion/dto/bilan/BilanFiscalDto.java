@@ -16,5 +16,7 @@ public record BilanFiscalDto(
         BigDecimal abattementMicroBic,
         BigDecimal resultatMicroBicImposable,
         String regimeFiscalConseille,
-        BigDecimal differenceGainImposable
+        BigDecimal differenceGainImposable,
+        Boolean estLoueCourteDuree,
+        String caseFiscaleMicroBic
 ) {}

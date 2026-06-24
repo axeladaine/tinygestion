@@ -35,7 +35,9 @@ describe('BilanFiscalService', () => {
       abattementMicroBic: 1500,
       resultatMicroBicImposable: 1500,
       regimeFiscalConseille: 'REGIME_REEL_AVANTAGEUX',
-      differenceGainImposable: 700
+      differenceGainImposable: 700,
+      estLoueCourteDuree: false,
+      caseFiscaleMicroBic: '5NI'
     };
 
     service.getBilanFiscal(10, 2026).subscribe(data => {

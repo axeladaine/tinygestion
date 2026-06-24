@@ -101,7 +101,7 @@
             <h4>Recommandation : Régime Micro-BIC</h4>
             <p>
               Le régime Micro-BIC est plus avantageux cette année. L'assiette de vos revenus imposables est inférieure de 
-              <strong>{{ bilan.differenceGainImposable | number:'1.2-2' }} €</strong> par rapport au régime Réel grâce à l'abattement forfaitaire de {{ bilan.estMeubleTourisme ? '71%' : '50%' }}.
+              <strong>{{ bilan.differenceGainImposable | number:'1.2-2' }} €</strong> par rapport au régime Réel grâce à l'abattement forfaitaire de {{ bilan.caseFiscaleMicroBic === '5NH' ? '30%' : '50%' }}.
             </p>
           } @else {
             <h4>Régimes équivalents</h4>
@@ -182,7 +182,7 @@
             <div class="formula-row">
               <div class="label-info">
                 <span class="label">Abattement forfaitaire</span>
-                <span class="detail-note">({{ bilan.estMeubleTourisme ? '71%' : '50%' }} - {{ bilan.estMeubleTourisme ? 'Meublé de tourisme classé' : 'Meublé classique' }})</span>
+                 <span class="detail-note">({{ bilan.caseFiscaleMicroBic === '5NH' ? '30%' : '50%' }} - {{ bilan.caseFiscaleMicroBic === '5NH' ? 'Saisonnier non classé' : (bilan.caseFiscaleMicroBic === '5NG' ? 'Saisonnier classé' : 'Meublé classique') }})</span>
               </div>
               <span class="value text-minus">- {{ bilan.abattementMicroBic | number:'1.2-2' }} €</span>
             </div>
@@ -213,7 +213,7 @@
             
             <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem;">
               Pour déclarer vos revenus sous le régime **Micro-BIC**, reportez simplement le montant total brut de vos loyers encaissés. 
-              <strong>L'administration fiscale appliquera automatiquement l'abattement</strong> de {{ bilan.estMeubleTourisme ? '71%' : '50%' }} représentatif de vos frais. Ne déduisez rien vous-même.
+              <strong>L'administration fiscale appliquera automatiquement l'abattement</strong> de {{ bilan.caseFiscaleMicroBic === '5NH' ? '30%' : '50%' }} représentatif de vos frais. Ne déduisez rien vous-même.
             </p>
             
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
@@ -226,13 +226,13 @@
                 <div style="text-align: right;">
                   <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; letter-spacing: 0.05em;">Case de la déclaration 2042-C-PRO</div>
                   <span class="fiscal-box-badge fiscal-green" style="font-size: 1.1rem; font-weight: 900; background: var(--green) !important; padding: 0.5rem 1rem; border-radius: 8px; color: white;">
-                    {{ bilan.estMeubleTourisme ? '5NG' : '5ND' }}
+                    {{ bilan.caseFiscaleMicroBic }}
                   </span>
                 </div>
               </div>
 
               <div style="padding-top: 0.75rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin-top: 1rem;">
-                <strong>Classification :</strong> {{ bilan.estMeubleTourisme ? 'Meublé de tourisme classé (71% d\'abattement)' : 'Location meublée classique (50% d\'abattement)' }}.
+                <strong>Classification :</strong> {{ bilan.caseFiscaleMicroBic === '5NH' ? 'Meublé de tourisme non classé (30% d\'abattement)' : (bilan.caseFiscaleMicroBic === '5NG' ? 'Meublé de tourisme classé (50% d\'abattement)' : 'Location meublée classique (50% d\'abattement)') }}.
               </div>
             </div>
           </div>
@@ -252,6 +252,14 @@
               Le régime **Réel Simplifié** vous permet d'effacer tout ou partie de votre impôt grâce à la déduction des charges réelles et des amortissements. 
               Vous devez préalablement envoyer une liasse fiscale (formulaires 2031 & 2033) via votre espace professionnel impots.gouv.fr, puis reporter le résultat sur votre déclaration personnelle.
             </p>
+            
+            @if ((bilan.caseFiscaleMicroBic === '5NH' && bilan.recettesBrutes > 15000) || 
+                 ((bilan.caseFiscaleMicroBic === '5NG' || bilan.caseFiscaleMicroBic === '5NI') && bilan.recettesBrutes > 83600)) {
+              <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; color: #b45309; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Attention : Vos recettes perçues de {{ bilan.recettesBrutes | number:'1.2-2' }} € dépassent le plafond légal de {{ bilan.caseFiscaleMicroBic === '5NH' ? '15 000' : '83 600' }} € pour le régime Micro-BIC. Le régime Réel Simplifié est obligatoire pour cette déclaration.</span>
+              </div>
+            }
             
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">

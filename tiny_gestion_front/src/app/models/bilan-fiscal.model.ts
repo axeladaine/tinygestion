@@ -13,4 +13,6 @@ export interface BilanFiscal {
   resultatMicroBicImposable: number;
   regimeFiscalConseille: string; // 'REGIME_REEL_AVANTAGEUX' | 'MICRO_BIC_AVANTAGEUX' | 'EQUIVALENT'
   differenceGainImposable: number;
+  estLoueCourteDuree: boolean;
+  caseFiscaleMicroBic: string;
 }
