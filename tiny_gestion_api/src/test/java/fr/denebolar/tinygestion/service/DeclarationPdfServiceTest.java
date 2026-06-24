@@ -1,5 +1,6 @@
 package fr.denebolar.tinygestion.service;
 
+import com.lowagie.text.pdf.PdfReader;
 import fr.denebolar.tinygestion.domain.*;
 import fr.denebolar.tinygestion.dto.bilan.BilanFiscalDto;
 import fr.denebolar.tinygestion.repository.BienAmortissableRepository;
@@ -145,7 +146,7 @@ public class DeclarationPdfServiceTest {
 
         // Act
         byte[] pdfBytes = declarationPdfService.genererDeclarationPdf(10L, 2026, mockUser);
-
+ 
         // Assert
         assertNotNull(pdfBytes);
         assertTrue(pdfBytes.length > 0);
