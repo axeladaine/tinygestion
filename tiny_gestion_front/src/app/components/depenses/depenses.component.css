@@ -436,3 +436,10 @@ input[type="radio"] {
     gap: 1.5rem;
   }
 }
+
+.form-help-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}

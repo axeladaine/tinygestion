@@ -467,3 +467,10 @@ input:focus, select:focus, textarea:focus, input[readonly]:focus {
   color: #64748b;
   font-weight: 500;
 }
+
+.form-help-text {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}

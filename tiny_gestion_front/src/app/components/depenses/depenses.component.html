@@ -72,6 +72,7 @@
             <div class="form-group col-6">
               <label for="tauxAffectationLocation">Affectation Tiny (%) *</label>
               <input type="number" id="tauxAffectationLocation" name="tauxAffectationLocation" [(ngModel)]="nouvelleDepense.tauxAffectationLocation" min="0" max="100" required>
+              <small class="form-help-text">100% si le frais concerne uniquement la Tiny. Réduisez si usage mixte (perso/pro).</small>
             </div>
           </div>
 

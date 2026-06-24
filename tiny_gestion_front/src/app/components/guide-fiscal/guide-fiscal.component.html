@@ -31,6 +31,21 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
       <span>Échéancier</span>
     </button>
+    <button (click)="changerOnglet('declaration')" [class.active]="ongletActif === 'declaration'" class="tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon">
+        <path d="m9 11 3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      <span>Déclaration Pas-à-Pas</span>
+    </button>
+    <button (click)="changerOnglet('faq')" [class.active]="ongletActif === 'faq'" class="tab-item">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" x2="12.01" y1="17" y2="17"/>
+      </svg>
+      <span>FAQ</span>
+    </button>
   </nav>
 
   <!-- Contenu Conditionnel -->
@@ -282,6 +297,112 @@
               <p>Consultez votre avis de CFE en ligne sur votre espace professionnel (aucun avis n'est envoyé par courrier). Le paiement doit être effectué en ligne avant le 15 décembre.</p>
             </div>
           </div>
+        </div>
+      </div>
+    }
+
+    <!-- CHAPITRE 6 : Ma Déclaration Pas-à-Pas (Sans Comptable) -->
+    @if (ongletActif === 'declaration') {
+      <div class="guide-card animate-fade">
+        <h3>Déclarer mes impôts LMNP sans comptable : Mode d'emploi</h3>
+        <p class="intro-paragraph">
+          Beaucoup de loueurs pensent qu'un comptable est obligatoire pour déclarer au régime Réel. C'est faux ! En utilisant les calculs de l'application, vous pouvez remplir vos obligations vous-même très simplement et économiser des centaines d'euros de frais comptables.
+        </p>
+
+        <div class="declaration-steps" style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
+          <div class="dec-step-box" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; border-left: 4px solid var(--primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h5 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">Étape 1 : Valider les données de l'année précédente</h5>
+              <span style="font-size: 0.75rem; font-weight: 800; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 4px;">À faire avant le 30 Avril</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin: 0 0 0.75rem 0;">
+              Assurez-vous d'avoir saisi l'intégralité de vos réservations (recettes) et factures (dépenses) de l'année précédente.
+            </p>
+            <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+              <li>Vérifiez dans le <a [routerLink]="['/tableau-de-bord']" style="color: var(--primary); font-weight: 700; text-decoration: none;">Tableau de bord</a> qu'aucune alerte de justificatif manquant n'apparaît.</li>
+              <li>Consultez l'onglet <a [routerLink]="['/bilan-annuel']" style="color: var(--primary); font-weight: 700; text-decoration: none;">Bilan Annuel</a> pour l'année d'imposition concernée.</li>
+            </ul>
+          </div>
+
+          <div class="dec-step-box" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; border-left: 4px solid var(--green);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h5 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">Étape 2 : Envoyer la liasse de résultat (Option Régime Réel uniquement)</h5>
+              <span style="font-size: 0.75rem; font-weight: 800; background: var(--green-dim); color: var(--green); padding: 0.2rem 0.5rem; border-radius: 4px;">Télédéclaration en Mai</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin: 0 0 0.75rem 0;">
+              Si l'application vous conseille le **Régime Réel**, vous devez envoyer la liasse fiscale (formulaires 2031 et annexes 2033) via le portail professionnel de l'État :
+            </p>
+            <ol style="margin: 0 0 0.75rem 0; padding-left: 1.2rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+              <li>Connectez-vous sur votre <a href="https://www.impots.gouv.fr/professionnel" target="_blank" rel="noopener noreferrer" class="official-link">Espace Professionnel Impots.gouv</a>.</li>
+              <li>Accédez à la télédéclaration de résultat. Vous reporterez les chiffres fournis par l'application :
+                <br>&bull; **Actif/Passif (2033-A)** : Valeur d'origine du bien (montant amortissable), dettes (emprunts éventuels).
+                <br>&bull; **Compte de résultat (2033-B)** : Vos loyers (ligne Recettes), vos charges réelles (ligne Dépenses), et vos amortissements (ligne Dotations).
+              </li>
+              <li>Validez et transmettez. La liasse calculera le résultat net (qui correspondra à l'assiette imposable indiquée dans votre onglet Bilan).</li>
+            </ol>
+            <div style="display: flex; gap: 0.5rem; align-items: flex-start; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; margin-top: 0.75rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">
+                <strong>Astuce d'autonomie :</strong> Des logiciels en ligne agréés par l'État permettent de télétransmettre vos formulaires 2031/2033 automatiquement pour environ 100 à 150 €/an en y recopiant simplement la balance comptable de l'application, ce qui reste 3 à 5 fois moins cher qu'un expert-comptable traditionnel.
+              </span>
+            </div>
+          </div>
+
+          <div class="dec-step-box" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; border-left: 4px solid #b45309;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h5 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">Étape 3 : Télédéclarer sur votre déclaration de revenus personnelle</h5>
+              <span style="font-size: 0.75rem; font-weight: 800; background: #fef3c7; color: #b45309; padding: 0.2rem 0.5rem; border-radius: 4px;">Fin Mai - Début Juin</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin: 0 0 0.75rem 0;">
+              Dans votre espace particulier impots.gouv.fr (déclaration de revenus), cochez la case **« Revenus de locations meublées non professionnelles »** pour accéder au formulaire **2042-C-PRO** :
+            </p>
+            <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+              <li>**Si Micro-BIC est conseillé** : Recopiez le total brut de vos recettes dans la case **5ND** (ou **5NG** s'il s'agit d'un meublé classé de tourisme).</li>
+              <li>**Si le Réel Simplifié est conseillé** : Reportez le résultat net de votre liasse fiscale (bénéfice ou déficit) :
+                <br>&bull; Bénéfice imposable : Case **5NA**.
+                <br>&bull; Déficit de l'année : Case **5NY**.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- CHAPITRE 7 : FAQ (Foire Aux Questions) -->
+    @if (ongletActif === 'faq') {
+      <div class="guide-card animate-fade">
+        <h3>Questions fréquentes (FAQ) - Louer sa Tiny House</h3>
+        
+        <div class="faq-container" style="display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.5rem;">
+          
+          <div class="faq-item" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+            <h5 style="margin: 0 0 0.5rem 0; font-size: 1.05rem; font-weight: 700; color: var(--primary);">Puis-je amortir ma Tiny House si elle est sur remorque (mobile) ?</h5>
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+              **Oui.** Bien qu'une Tiny House soit mobile, elle constitue un investissement d'exploitation amortissable à partir du moment où elle est affectée de manière durable à une activité de location commerciale (LMNP). La remorque fait partie intégrante du coût d'achat global inscrit à l'actif.
+            </p>
+          </div>
+
+          <div class="faq-item" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+            <h5 style="margin: 0 0 0.5rem 0; font-size: 1.05rem; font-weight: 700; color: var(--primary);">Comment déclarer si je loue ma Tiny seulement une partie de l'année ?</h5>
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+              Vous devez déclarer les loyers perçus au prorata. Concernant les amortissements et les charges fixes (assurance, abonnement internet, etc.), la règle fiscale veut qu'ils soient calculés au prorata de l'usage. L'application intègre cette notion via le **taux d'affectation** : si le logement est loué 8 mois et que vous y logez 4 mois, réglez l'affectation à 67%.
+            </p>
+          </div>
+
+          <div class="faq-item" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+            <h5 style="margin: 0 0 0.5rem 0; font-size: 1.05rem; font-weight: 700; color: var(--primary);">Puis-je déduire mes frais de déplacement pour aller nettoyer ou entretenir ma Tiny House ?</h5>
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+              **Oui, au régime Réel.** Les trajets effectués entre votre domicile et le lieu d'implantation de la Tiny House pour des raisons d'entretien, de nettoyage ou de gestion des voyageurs sont considérés comme des dépenses d'exploitation. Vous devez conserver les justificatifs (ticket de péage, barème kilométrique officiel) et lier l'activité.
+            </p>
+          </div>
+
+          <div class="faq-item" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+            <h5 style="margin: 0 0 0.5rem 0; font-size: 1.05rem; font-weight: 700; color: var(--primary);">Comment obtenir une réduction d'impôt supplémentaire en LMNP réel ?</h5>
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+              En adhérant à un **Organisme de Gestion Agréé (CGA/OGA)**. Au régime réel, l'adhésion à un CGA (qui coûte environ 100 à 200 € par an) vous donne droit à une **réduction d'impôt sur le revenu égale aux 2/3 des frais de comptabilité** (dont l'abonnement à cette application !) dans la limite de 915 € par an. C'est un excellent moyen de réduire vos coûts d'exploitation à zéro.
+            </p>
+          </div>
+          
         </div>
       </div>
     }
