@@ -45,4 +45,38 @@ describe('RecetteService', () => {
     expect(req.request.method).toBe('POST');
     req.flush(newRecette);
   });
+
+  it('should fetch recipes by period via GET', () => {
+    const mockRecettes: Recette[] = [
+      { id: 100, plateforme: 'AIRBNB', montantBrut: 300 } as any as Recette
+    ];
+
+    service.getRecettesByPeriod(10, '2026-01-01', '2026-12-31').subscribe(data => {
+      expect(data).toEqual(mockRecettes);
+    });
+
+    const req = httpMock.expectOne('/api/recettes/logement/10/periode?debut=2026-01-01&fin=2026-12-31');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockRecettes);
+  });
+
+  it('should update recipe via PUT', () => {
+    const updatedRecette: Recette = { id: 100, plateforme: 'BOOKING', montantBrut: 400 } as any as Recette;
+
+    service.updateRecette(100, updatedRecette).subscribe(data => {
+      expect(data).toEqual(updatedRecette);
+    });
+
+    const req = httpMock.expectOne('/api/recettes/100');
+    expect(req.request.method).toBe('PUT');
+    req.flush(updatedRecette);
+  });
+
+  it('should delete recipe via DELETE', () => {
+    service.deleteRecette(100).subscribe();
+
+    const req = httpMock.expectOne('/api/recettes/100');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
 });

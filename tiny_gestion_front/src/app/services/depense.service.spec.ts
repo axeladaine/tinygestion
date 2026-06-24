@@ -45,4 +45,38 @@ describe('DepenseService', () => {
     expect(req.request.method).toBe('POST');
     req.flush(newDepense);
   });
+
+  it('should fetch expenses by period via GET', () => {
+    const mockDepenses: Depense[] = [
+      { id: 200, fournisseur: 'EDF', montantTtc: 120 } as any as Depense
+    ];
+
+    service.getDepensesByPeriod(10, '2026-01-01', '2026-12-31').subscribe(data => {
+      expect(data).toEqual(mockDepenses);
+    });
+
+    const req = httpMock.expectOne('/api/depenses/logement/10/periode?debut=2026-01-01&fin=2026-12-31');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockDepenses);
+  });
+
+  it('should update expense via PUT', () => {
+    const updatedDepense: Depense = { id: 200, fournisseur: 'EDF Nouveau', montantTtc: 150 } as any as Depense;
+
+    service.updateDepense(200, updatedDepense).subscribe(data => {
+      expect(data).toEqual(updatedDepense);
+    });
+
+    const req = httpMock.expectOne('/api/depenses/200');
+    expect(req.request.method).toBe('PUT');
+    req.flush(updatedDepense);
+  });
+
+  it('should delete expense via DELETE', () => {
+    service.deleteDepense(200).subscribe();
+
+    const req = httpMock.expectOne('/api/depenses/200');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
 });

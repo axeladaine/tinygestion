@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { authInterceptor } from './auth.interceptor';
 import { AuthService } from '../services/auth.service';
@@ -10,7 +10,7 @@ describe('authInterceptor', () => {
   let authServiceSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(() => {
-    const authSpy = jasmine.createSpyObj('AuthService', ['getToken']);
+    const authSpy = jasmine.createSpyObj('AuthService', ['getToken', 'deconnexion']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -46,5 +46,50 @@ describe('authInterceptor', () => {
 
     const req = httpMock.expectOne('/api/test');
     expect(req.request.headers.has('Authorization')).toBeFalse();
+  });
+
+  it('should trigger deconnexion on 401 Unauthorized', () => {
+    authServiceSpy.getToken.and.returnValue('token');
+
+    httpClient.get('/api/test').subscribe({
+      next: () => fail('should have failed'),
+      error: (err: HttpErrorResponse) => {
+        expect(err.status).toBe(401);
+        expect(authServiceSpy.deconnexion).toHaveBeenCalled();
+      }
+    });
+
+    const req = httpMock.expectOne('/api/test');
+    req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+  });
+
+  it('should trigger deconnexion on 403 Forbidden', () => {
+    authServiceSpy.getToken.and.returnValue('token');
+
+    httpClient.get('/api/test').subscribe({
+      next: () => fail('should have failed'),
+      error: (err: HttpErrorResponse) => {
+        expect(err.status).toBe(403);
+        expect(authServiceSpy.deconnexion).toHaveBeenCalled();
+      }
+    });
+
+    const req = httpMock.expectOne('/api/test');
+    req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+  });
+
+  it('should not trigger deconnexion on other errors', () => {
+    authServiceSpy.getToken.and.returnValue('token');
+
+    httpClient.get('/api/test').subscribe({
+      next: () => fail('should have failed'),
+      error: (err: HttpErrorResponse) => {
+        expect(err.status).toBe(500);
+        expect(authServiceSpy.deconnexion).not.toHaveBeenCalled();
+      }
+    });
+
+    const req = httpMock.expectOne('/api/test');
+    req.flush('Internal Server Error', { status: 500, statusText: 'Server Error' });
   });
 });

@@ -2,6 +2,7 @@ package fr.denebolar.tinygestion.service;
 
 import fr.denebolar.tinygestion.domain.*;
 import fr.denebolar.tinygestion.repository.DepenseRepository;
+import fr.denebolar.tinygestion.repository.DocumentJustificatifRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,9 @@ public class DepenseServiceTest {
 
     @Mock
     private LogementService logementService;
+
+    @Mock
+    private DocumentJustificatifRepository documentRepository;
 
     @InjectMocks
     private DepenseService service;
@@ -129,5 +133,65 @@ public class DepenseServiceTest {
         service.deleteDepense(200L, user);
 
         verify(repository, times(1)).delete(depense);
+    }
+
+    @Test
+    public void should_save_depense_with_justificatif() {
+        DocumentJustificatif doc = DocumentJustificatif.builder().id(300L).build();
+        depense.setDocumentJustificatif(doc);
+
+        when(logementService.getLogementById(10L, user)).thenReturn(logement);
+        when(repository.save(any(Depense.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(documentRepository.findById(300L)).thenReturn(Optional.of(doc));
+
+        Depense result = service.saveDepense(depense, user);
+
+        assertNotNull(result);
+        assertEquals(doc, result.getDocumentJustificatif());
+        verify(documentRepository, times(1)).save(doc);
+        assertEquals("DEPENSE", doc.getEntiteLieeType());
+        assertEquals(200L, doc.getEntiteLieeId());
+    }
+
+    @Test
+    public void should_update_depense_with_new_justificatif() {
+        DocumentJustificatif oldDoc = DocumentJustificatif.builder().id(300L).entiteLieeType("DEPENSE").entiteLieeId(200L).build();
+        depense.setDocumentJustificatif(oldDoc);
+
+        DocumentJustificatif newDoc = DocumentJustificatif.builder().id(400L).build();
+        Depense details = Depense.builder().documentJustificatif(newDoc).build();
+
+        when(repository.findById(200L)).thenReturn(Optional.of(depense));
+        when(logementService.getLogementById(10L, user)).thenReturn(logement);
+        when(documentRepository.findById(400L)).thenReturn(Optional.of(newDoc));
+        when(repository.save(any(Depense.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Depense result = service.updateDepense(200L, details, user);
+
+        assertNotNull(result);
+        assertEquals(newDoc, result.getDocumentJustificatif());
+        verify(documentRepository, times(1)).save(oldDoc);
+        verify(documentRepository, times(1)).save(newDoc);
+        assertNull(oldDoc.getEntiteLieeType());
+        assertEquals("DEPENSE", newDoc.getEntiteLieeType());
+    }
+
+    @Test
+    public void should_update_depense_removing_justificatif() {
+        DocumentJustificatif oldDoc = DocumentJustificatif.builder().id(300L).entiteLieeType("DEPENSE").entiteLieeId(200L).build();
+        depense.setDocumentJustificatif(oldDoc);
+
+        Depense details = Depense.builder().documentJustificatif(null).build();
+
+        when(repository.findById(200L)).thenReturn(Optional.of(depense));
+        when(logementService.getLogementById(10L, user)).thenReturn(logement);
+        when(repository.save(any(Depense.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Depense result = service.updateDepense(200L, details, user);
+
+        assertNotNull(result);
+        assertNull(result.getDocumentJustificatif());
+        verify(documentRepository, times(1)).save(oldDoc);
+        assertNull(oldDoc.getEntiteLieeType());
     }
 }

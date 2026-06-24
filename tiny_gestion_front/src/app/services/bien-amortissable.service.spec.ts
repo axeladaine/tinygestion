@@ -45,4 +45,24 @@ describe('BienAmortissableService', () => {
     expect(req.request.method).toBe('POST');
     req.flush(newBien);
   });
+
+  it('should update asset via PUT', () => {
+    const updatedBien: BienAmortissable = { id: 300, nom: 'Terrasse Modifiée', montantTtc: 3500 } as any as BienAmortissable;
+
+    service.updateBien(300, updatedBien).subscribe(data => {
+      expect(data).toEqual(updatedBien);
+    });
+
+    const req = httpMock.expectOne('/api/biens-amortissables/300');
+    expect(req.request.method).toBe('PUT');
+    req.flush(updatedBien);
+  });
+
+  it('should delete asset via DELETE', () => {
+    service.deleteBien(300).subscribe();
+
+    const req = httpMock.expectOne('/api/biens-amortissables/300');
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
 });

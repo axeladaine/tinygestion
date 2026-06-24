@@ -45,4 +45,28 @@ describe('LogementService', () => {
     expect(req.request.method).toBe('POST');
     req.flush(newLogement);
   });
+
+  it('should fetch lodging by ID via GET', () => {
+    const mockLogement: Logement = { id: 10, nom: 'Tiny du Lac' } as any as Logement;
+
+    service.getLogementById(10).subscribe(data => {
+      expect(data).toEqual(mockLogement);
+    });
+
+    const req = httpMock.expectOne('/api/logements/10');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockLogement);
+  });
+
+  it('should update lodging via PUT', () => {
+    const updatedLogement: Logement = { id: 10, nom: 'Tiny du Lac Nouveau' } as any as Logement;
+
+    service.updateLogement(10, updatedLogement).subscribe(data => {
+      expect(data).toEqual(updatedLogement);
+    });
+
+    const req = httpMock.expectOne('/api/logements/10');
+    expect(req.request.method).toBe('PUT');
+    req.flush(updatedLogement);
+  });
 });

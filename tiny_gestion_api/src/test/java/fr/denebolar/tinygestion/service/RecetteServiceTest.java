@@ -2,6 +2,7 @@ package fr.denebolar.tinygestion.service;
 
 import fr.denebolar.tinygestion.domain.*;
 import fr.denebolar.tinygestion.repository.RecetteRepository;
+import fr.denebolar.tinygestion.repository.DocumentJustificatifRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,9 @@ public class RecetteServiceTest {
 
     @Mock
     private LogementService logementService;
+
+    @Mock
+    private DocumentJustificatifRepository documentRepository;
 
     @InjectMocks
     private RecetteService service;
@@ -129,5 +133,65 @@ public class RecetteServiceTest {
         service.deleteRecette(100L, user);
 
         verify(repository, times(1)).delete(recette);
+    }
+
+    @Test
+    public void should_save_recette_with_justificatif() {
+        DocumentJustificatif doc = DocumentJustificatif.builder().id(300L).build();
+        recette.setDocumentJustificatif(doc);
+
+        when(logementService.getLogementById(10L, user)).thenReturn(logement);
+        when(repository.save(any(Recette.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(documentRepository.findById(300L)).thenReturn(Optional.of(doc));
+
+        Recette result = service.saveRecette(recette, user);
+
+        assertNotNull(result);
+        assertEquals(doc, result.getDocumentJustificatif());
+        verify(documentRepository, times(1)).save(doc);
+        assertEquals("RECETTE", doc.getEntiteLieeType());
+        assertEquals(100L, doc.getEntiteLieeId());
+    }
+
+    @Test
+    public void should_update_recette_with_new_justificatif() {
+        DocumentJustificatif oldDoc = DocumentJustificatif.builder().id(300L).entiteLieeType("RECETTE").entiteLieeId(100L).build();
+        recette.setDocumentJustificatif(oldDoc);
+
+        DocumentJustificatif newDoc = DocumentJustificatif.builder().id(400L).build();
+        Recette details = Recette.builder().documentJustificatif(newDoc).build();
+
+        when(repository.findById(100L)).thenReturn(Optional.of(recette));
+        when(logementService.getLogementById(10L, user)).thenReturn(logement);
+        when(documentRepository.findById(400L)).thenReturn(Optional.of(newDoc));
+        when(repository.save(any(Recette.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Recette result = service.updateRecette(100L, details, user);
+
+        assertNotNull(result);
+        assertEquals(newDoc, result.getDocumentJustificatif());
+        verify(documentRepository, times(1)).save(oldDoc);
+        verify(documentRepository, times(1)).save(newDoc);
+        assertNull(oldDoc.getEntiteLieeType());
+        assertEquals("RECETTE", newDoc.getEntiteLieeType());
+    }
+
+    @Test
+    public void should_update_recette_removing_justificatif() {
+        DocumentJustificatif oldDoc = DocumentJustificatif.builder().id(300L).entiteLieeType("RECETTE").entiteLieeId(100L).build();
+        recette.setDocumentJustificatif(oldDoc);
+
+        Recette details = Recette.builder().documentJustificatif(null).build();
+
+        when(repository.findById(100L)).thenReturn(Optional.of(recette));
+        when(logementService.getLogementById(10L, user)).thenReturn(logement);
+        when(repository.save(any(Recette.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Recette result = service.updateRecette(100L, details, user);
+
+        assertNotNull(result);
+        assertNull(result.getDocumentJustificatif());
+        verify(documentRepository, times(1)).save(oldDoc);
+        assertNull(oldDoc.getEntiteLieeType());
     }
 }

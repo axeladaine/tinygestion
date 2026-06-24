@@ -131,6 +131,16 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.11</version>
+				<configuration>
+					<excludes>
+						<exclude>fr/denebolar/tinygestion/dto/**/*</exclude>
+						<exclude>fr/denebolar/tinygestion/config/**/*</exclude>
+						<exclude>fr/denebolar/tinygestion/security/**/*</exclude>
+						<exclude>fr/denebolar/tinygestion/domain/**/*</exclude>
+						<exclude>fr/denebolar/tinygestion/controller/**/*</exclude>
+						<exclude>fr/denebolar/tinygestion/TinyGestionApiApplication.class</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
