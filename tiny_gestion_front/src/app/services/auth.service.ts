@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 export interface Utilisateur {
@@ -20,6 +21,7 @@ export interface AuthResponse {
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private router = inject(Router);
   
   // Signal pour l'utilisateur actuellement connecté
   private currentUserSignal = signal<Utilisateur | null>(null);
@@ -63,6 +65,7 @@ export class AuthService {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('utilisateur_session');
     this.currentUserSignal.set(null);
+    this.router.navigate(['/connexion']);
   }
 
   private sauvegarderSession(reponse: AuthResponse): void {
