@@ -9,18 +9,15 @@
     </div>
     <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
       @if (bilan) {
-        <button (click)="exporterPdf()" class="btn-primary" [disabled]="telechargementEnCours" title="Télécharger la déclaration fiscale 2031 & 2033 pré-remplie au format PDF" style="display: flex; align-items: center; justify-content: center; height: 42px; padding: 0 1.25rem; font-weight: 700; gap: 0.5rem;">
-          @if (telechargementEnCours) {
-            <span class="spinner" style="width: 16px; height: 16px; border-width: 2px;"></span>
-            <span>Génération...</span>
-          } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            <span>Déclaration PDF (2031 & 2033)</span>
-          }
+        <button (click)="afficherAidePdf()" class="btn-primary" title="Comment remplir la déclaration fiscale 2031 & 2033" style="display: flex; align-items: center; justify-content: center; height: 42px; padding: 0 1.25rem; font-weight: 700; gap: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Comment remplir ma déclaration ?</span>
         </button>
       }
 
@@ -427,5 +424,83 @@
         </div>
       </div>
     }
+  }
+
+  <!-- Modale d'aide PDF -->
+  @if (afficherModalPdf && bilan) {
+    <div class="modal-overlay" (click)="fermerModalPdf()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <button class="modal-close" (click)="fermerModalPdf()" aria-label="Fermer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <h3 class="modal-title">Remplir votre liasse fiscale (Régime Réel)</h3>
+        
+        <p class="modal-desc">
+          Pour déclarer vos revenus au régime Réel Simplifié, vous devez remplir les formulaires <strong>2031-SD</strong> et <strong>2033-SD</strong> et les transmettre via votre espace professionnel impots.gouv.fr.
+        </p>
+
+        <div class="modal-actions">
+          <a href="https://www.impots.gouv.fr/formulaire/2031-sd/impot-sur-le-revenu-benefices-industriels-et-commerciaux" target="_blank" rel="noopener noreferrer" class="btn-outline">
+            Télécharger le Formulaire 2031-SD
+          </a>
+          <a href="https://www.impots.gouv.fr/formulaire/2033-sd/liasse-bicsi" target="_blank" rel="noopener noreferrer" class="btn-outline">
+            Télécharger les Annexes 2033-SD
+          </a>
+        </div>
+
+        <div class="instructions-container">
+          <div class="instruction-box">
+            <h4>1. Formulaire 2031-SD (Déclaration de résultat)</h4>
+            <ul>
+              <li><strong>Cadre A (Identification) :</strong> Indiquez vos Nom, Prénom, et l'adresse de la Tiny House.</li>
+              <li>
+                <strong>Cadre C, Ligne 1 / Cadre 7 :</strong>
+                @if (bilan.resultatReelImposable > 0) {
+                  Reportez <strong>{{ bilan.resultatReelImposable | number:'1.2-2' }} €</strong> dans la colonne <strong>Bénéfice</strong>.
+                } @else {
+                  Reportez <strong>{{ -bilan.resultatReelImposable | number:'1.2-2' }} €</strong> dans la colonne <strong>Déficit</strong>.
+                }
+              </li>
+            </ul>
+          </div>
+
+          <div class="instruction-box">
+            <h4>2. Annexe 2033-A-SD (Bilan simplifié)</h4>
+            <ul>
+              <li><strong>Actif / Immobilisations (028, 030, 032) :</strong> Indiquez la valeur d'achat brute de vos biens, les amortissements cumulés, et la valeur nette (Brut - Amortissements).</li>
+            </ul>
+          </div>
+
+          <div class="instruction-box">
+            <h4>3. Annexe 2033-B-SD (Compte de résultat simplifié)</h4>
+            <ul>
+              <li><strong>Ligne 217 (Chiffre d'affaires) :</strong> {{ bilan.recettesBrutes | number:'1.2-2' }} €</li>
+              <li><strong>Lignes 238, 242, 244 (Charges) :</strong> Répartissez vos charges déductibles (Total : {{ bilan.depensesRetenues | number:'1.2-2' }} €).</li>
+              <li><strong>Ligne 254 (Amortissements) :</strong> {{ bilan.amortissementUtilise | number:'1.2-2' }} €</li>
+              <li>
+                <strong>Ligne 312 / 314 (Résultat) :</strong>
+                @if (bilan.resultatReelImposable > 0) {
+                  Bénéfice de <strong>{{ bilan.resultatReelImposable | number:'1.2-2' }} €</strong> (Ligne 312).
+                } @else {
+                  Déficit de <strong>{{ -bilan.resultatReelImposable | number:'1.2-2' }} €</strong> (Ligne 314).
+                }
+              </li>
+            </ul>
+          </div>
+          
+          <div class="instruction-box">
+            <h4>4. Annexe 2033-C-SD (Immobilisations & Amortissements)</h4>
+            <ul>
+              <li><strong>Tableau des Immobilisations :</strong> Détaillez la valeur de vos biens à l'ouverture et à la clôture de l'exercice.</li>
+              <li><strong>Tableau des Amortissements (Ligne 522) :</strong> Dotation de l'exercice = {{ bilan.amortissementUtilise | number:'1.2-2' }} €.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   }
 </div>
